@@ -7,9 +7,15 @@ use App\Models\Acessorios;
 
 class AcessoriosController extends Controller
 {
-    public function index()
+    public function index(Request $request)
     {
-        $dados = Acessorios::all();
+        $query = Acessorios::query();
+
+        if ($request->filled('tipo') && $request->filled('valor')) {
+            $query->where($request->tipo, 'like', '%' . $request->valor . '%');
+        }
+
+        $dados = $query->get();
 
         return view('acessorios.list', compact('dados'));
     }
@@ -23,13 +29,13 @@ class AcessoriosController extends Controller
     {
         $request->validate([
             'nome'      => 'required',
-            'categoria' => 'required',
             'preco'     => 'required|numeric',
+            'quantidade' => 'required|integer|min:0',
         ], [
             'nome.required'      => 'O nome é obrigatório.',
-            'categoria.required' => 'A categoria é obrigatória.',
             'preco.required'     => 'O preço é obrigatório.',
-            'preco.numeric'      => 'O preço deve ser um valor numérico.',
+            'quantidade.required' => 'A quantidade é obrigatória.',
+            'quantidade.integer' => 'A quantidade deve ser um valor inteiro.',
         ]);
     }
 
@@ -44,9 +50,9 @@ class AcessoriosController extends Controller
 
     public function edit($id)
     {
-        $data = Acessorios::findOrFail($id);
+        $dado = Acessorios::findOrFail($id);
 
-        return view('acessorios.form', compact('data'));
+        return view('acessorios.form', compact('dado'));
     }
 
     public function update(Request $request, $id)

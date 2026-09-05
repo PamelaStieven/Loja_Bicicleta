@@ -22,6 +22,7 @@ class VendaSeeder extends Seeder
             $vendas[] = [
                 'usuario_id'   => rand(1, 5),
                 'bicicleta_id' => rand(1, 5),
+                'funcionario_id' => rand(1, 5),
                 'quantidade'   => $quantidade,
                 'valor_total'  => $quantidade * $valorUnitario,
                 'data_venda'   => now()->subDays(rand(1, 30)),
@@ -30,7 +31,7 @@ class VendaSeeder extends Seeder
             ];
         }
 
-        DB::table('vendas')->insert($vendas);
+        DB::table('venda')->insert($vendas);
 
         Schema::enableForeignKeyConstraints();
     }

@@ -13,5 +13,8 @@ class Bicicleta extends Model
         'marca',
         'modelo',
         'preco',
+        'cor',
+        'aro',
+        'quantidade',
     ];
 }

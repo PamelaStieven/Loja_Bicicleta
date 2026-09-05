@@ -14,8 +14,8 @@ return new class extends Migration
         Schema::create('acessorios', function (Blueprint $table) {
            $table->id();
             $table->string('nome');
-            $table->string('categoria');
             $table->decimal('preco', 10, 2);
+            $table->integer('quantidade');
             $table->timestamps();
         });
     }

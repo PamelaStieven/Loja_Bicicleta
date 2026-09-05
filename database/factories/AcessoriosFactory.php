@@ -18,8 +18,8 @@ class AcessoriosFactory extends Factory
         public function definition(): array {
         return [
             'nome' => $this->faker->word(),
-            'categoria' => $this->faker->randomElement(['Capacete', 'Luva', 'Farol', 'Cadeado']),
             'preco' => $this->faker->randomFloat(2, 30, 500),
+            'quantidade' => $this->faker->numberBetween(1, 100),
         ];
     }
 }

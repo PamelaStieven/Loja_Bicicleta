@@ -1,72 +1,91 @@
-<!doctype html>
-<html lang="pt-BR">
-
+<!DOCTYPE html>
+<html lang="pt-br">
 <head>
-    <meta charset="utf-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1">
-    <title>@yield('titulo', 'SVB - Bicicletas')</title>
-    
-    <!-- Bootstrap CSS -->
-    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet"
-        integrity="sha384-QWTKZyjpPEjISv5WaRU9OFeRpok6YctnYmDr5pNlyT2bRjXh0JMhjY6hW+ALEwIH" crossorigin="anonymous">
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>@yield('titulo', 'BikeSystem') - Gestão de Bicicletas</title>
+    <!-- Bootstrap 5 CSS -->
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    <!-- Bootstrap Icons -->
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.0/font/bootstrap-icons.css" rel="stylesheet">
+    <style>
+        body {
+            background-color: #f4f6f9;
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+        }
+        .navbar-custom {
+            background-color: #1e293b;
+        }
+        .card-custom {
+            border: none;
+            border-radius: 12px;
+            box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.05), 0 2px 4px -1px rgba(0, 0, 0, 0.03);
+            background-color: #ffffff;
+        }
+        .btn-primary {
+            background-color: #2563eb;
+            border-color: #2563eb;
+        }
+        .btn-primary:hover {
+            background-color: #1d4ed8;
+            border-color: #1d4ed8;
+        }
+        .table-custom thead {
+            background-color: #0f172a;
+            color: #ffffff;
+        }
+    </style>
 </head>
+<body class="d-flex flex-column min-vh-100">
 
-<body class="bg-light">
-
-    <header class="bg-dark text-white py-3 mb-4 shadow-sm">
+    <!-- Navbar -->
+    <nav class="navbar navbar-expand-lg navbar-dark navbar-custom shadow-sm mb-4">
         <div class="container">
-            <h4 class="mb-0">Sistema de Venda de Bicicletas (SVB)</h4>
+            <a class="navbar-brand fw-bold d-flex align-items-center gap-2" href="{{ route('bicicleta.index') }}">
+                <i class="bi bi-bicycle fs-4 text-warning"></i> BikeSystem
+            </a>
+            <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNav">
+                <span class="navbar-toggler-icon"></span>
+            </button>
+            <div class="collapse navbar-collapse" id="navbarNav">
+                <ul class="navbar-nav me-auto mb-2 mb-lg-0 ms-lg-3">
+                    <li class="nav-item">
+                        <a class="nav-link" href="{{ route('bicicleta.index') }}"><i class="bi bi-bicycle"></i> Bicicletas</a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link" href="{{ route('acessorios.index') }}"><i class="bi bi-tools"></i> Acessórios</a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link" href="{{ route('venda.index') }}"><i class="bi bi-cart-check"></i> Vendas</a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link" href="{{ route('usuario.index') }}"><i class="bi bi-people"></i> Usuários</a>
+                    </li>
+                </ul>
+                <div class="d-flex align-items-center gap-3">
+                    <span class="text-light small"><i class="bi bi-person-circle"></i> Operador</span>
+                    <!-- Localize na Navbar e substitua o botão Sair por este: -->
+<a href="{{ route('login') }}" class="btn btn-outline-light btn-sm">
+    <i class="bi bi-box-arrow-right me-1"></i> Sair
+</a>
+                </div>
+            </div>
         </div>
-    </header>
+    </nav>
 
-    <div class="container">
-        <div class="row">
-            <!-- Sidebar / Menu de Navegação -->
-            <aside class="col-md-3 mb-4">
-                @include('sidebar')
-            </aside>
+    <!-- Conteúdo Principal -->
+    <main class="container flex-grow-1">
+        @yield('conteudo')
+    </main>
 
-            <!-- Área de Conteúdo Principal -->
-            <main class="col-md-9">
-                <!-- Alert de Sucesso -->
-                @if (session('success'))
-                    <div class="alert alert-success alert-dismissible fade show" role="alert">
-                        {{ session('success') }}
-                        <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Fechar"></button>
-                    </div>
-                @endif
-
-                <!-- Alert de Erro de Sessão -->
-                @if (session('error'))
-                    <div class="alert alert-danger alert-dismissible fade show" role="alert">
-                        {{ session('error') }}
-                        <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Fechar"></button>
-                    </div>
-                @endif
-
-                <!-- Lista de Erros de Validação de Formulário -->
-                @if ($errors->any())
-                    <div class="alert alert-danger alert-dismissible fade show" role="alert">
-                        <strong>Por favor, verifique os erros abaixo:</strong>
-                        <ul class="mb-0 mt-1 ps-3">
-                            @foreach ($errors->all() as $error)
-                                <li>{{ $error }}</li>
-                            @endforeach
-                        </ul>
-                        <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Fechar"></button>
-                    </div>
-                @endif
-
-                <!-- Conteúdo Injetado pelas Views -->
-                @yield('conteudo')
-            </main>
+    <!-- Footer -->
+    <footer class="bg-white border-top py-3 mt-5">
+        <div class="container text-center text-muted small">
+            &copy; {{ date('Y') }} BikeSystem — Sistema de Gerenciamento de Vendas e Estoque.
         </div>
-    </div>
+    </footer>
 
-    <!-- Bootstrap JS Bundle com Popper -->
-    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"
-        integrity="sha384-YvpcrYf0tY3lHB60NNkmXc5s9fDVZLESaAA55NDzOxhy9GkcIdslK1eN7N6jIeHz" crossorigin="anonymous">
-    </script>
+    <!-- Bootstrap 5 JS Bundle -->
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
 </body>
-
 </html>

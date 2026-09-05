@@ -16,6 +16,8 @@
                         <option value="marca" {{ request('tipo') == 'marca' ? 'selected' : '' }}>Marca</option>
                         <option value="modelo" {{ request('tipo') == 'modelo' ? 'selected' : '' }}>Modelo</option>
                         <option value="cor" {{ request('tipo') == 'cor' ? 'selected' : '' }}>Cor</option>
+                        <option value="aro" {{ request('tipo') == 'aro' ? 'selected' : '' }}>Aro</option>
+                        <option value="quantidade" {{ request('tipo') == 'quantidade' ? 'selected' : '' }}>Quantidade</option>
                     </select>
                 </div>
 

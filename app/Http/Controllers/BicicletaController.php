@@ -33,10 +33,16 @@ class BicicletaController extends Controller
             'marca'  => 'required|string|max:255',
             'modelo' => 'required|string|max:255',
             'preco'  => 'required|numeric',
+            'cor' => 'nullable|string|max:255',
+            'aro' => 'nullable|integer|max:255',
+            'quantidade' => 'nullable|integer|max:255',
         ], [
             'marca.required'  => 'O campo marca é obrigatório.',
             'modelo.required' => 'O campo modelo é obrigatório.',
             'preco.required'  => 'O campo preço é obrigatório.',
+            'cor.string'      => 'O campo cor é obrigatório.',
+            'aro.integer'     => 'O campo aro é obrigatório.',
+            'quantidade.integer' => 'O campo quantidade é obrigatório.',
         ]);
 
         Bicicleta::create($request->all());
@@ -60,6 +66,9 @@ class BicicletaController extends Controller
             'marca'  => 'required|string|max:255',
             'modelo' => 'required|string|max:255',
             'preco'  => 'required|numeric',
+            'cor' => 'nullable|string|max:255',
+            'aro' => 'nullable|integer|max:255',
+            'quantidade' => 'nullable|integer|max:255',
         ]);
 
         $bicicleta->update($request->all());

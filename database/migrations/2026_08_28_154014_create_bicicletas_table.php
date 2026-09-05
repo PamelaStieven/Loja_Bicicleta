@@ -16,6 +16,9 @@ return new class extends Migration
             $table->string('marca');
             $table->string('modelo');
             $table->decimal('preco', 10, 2);
+            $table->string('cor')->nullable();
+            $table->integer('aro')->nullable();
+            $table->integer('quantidade')->nullable();
             $table->timestamps();
         });
     }

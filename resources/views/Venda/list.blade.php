@@ -8,6 +8,28 @@
         <a href="{{ route('venda.create') }}" class="btn btn-primary">+ Nova Venda</a>
     </div>
 
+    {{-- Barra de Busca --}}
+    <form action="{{ route('venda.index') }}" method="GET" class="d-flex gap-2 my-3">
+        <select name="tipo" class="form-select w-auto">
+            <option value="usuario" {{ request('tipo') == 'usuario' ? 'selected' : '' }}>Usuário</option>
+            <option value="funcionario" {{ request('tipo') == 'funcionario' ? 'selected' : '' }}>Funcionário</option>
+            <option value="item" {{ request('tipo') == 'item' ? 'selected' : '' }}>Item</option>
+            <option value="quantidade" {{ request('tipo') == 'quantidade' ? 'selected' : '' }}>Quantidade</option>
+            <option value="data" {{ request('tipo') == 'data' ? 'selected' : '' }}>Data</option>
+        </select>
+
+        <input 
+            type="text" 
+            name="valor" 
+            class="form-control" 
+            placeholder="Digite para pesquisar..." 
+            value="{{ request('valor') }}"
+        >
+
+        <button type="submit" class="btn btn-primary">Buscar</button>
+        <a href="{{ route('venda.index') }}" class="btn btn-secondary">Limpar</a>
+    </form>
+
     @if(session('success'))
         <div class="alert alert-success">{{ session('success') }}</div>
     @endif
@@ -22,7 +44,7 @@
                 <th>Qtd</th>
                 <th>Valor Total</th>
                 <th>Data</th>
-                <th>Ações</th>
+                <th class="text-center">Ações</th>
             </tr>
         </thead>
         <tbody>
@@ -43,7 +65,14 @@
                     <td>{{ $item->quantidade }}</td>
                     <td>R$ {{ number_format($item->valor_total, 2, ',', '.') }}</td>
                     <td>{{ \Carbon\Carbon::parse($item->data_venda)->format('d/m/Y') }}</td>
-                    <td>
+                    <td class="text-center">
+                        <a 
+                            href="{{ route('venda.edit', $item->id) }}" 
+                            class="btn btn-warning btn-sm" 
+                            title="Editar"
+                        >
+                            Editar
+                        </a>
                         <form action="{{ route('venda.destroy', $item->id) }}" method="POST" class="d-inline">
                             @csrf
                             @method('DELETE')

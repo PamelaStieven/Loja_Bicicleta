@@ -14,7 +14,7 @@ class Acessorios extends Model
 
     protected $fillable = [
         'nome',
-        'categoria',
         'preco',
+        'quantidade',
     ];
 }
