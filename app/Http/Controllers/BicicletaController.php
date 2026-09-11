@@ -9,7 +9,7 @@ class BicicletaController extends Controller
 {
     public function index(Request $request)
     {
-        $query = Bicicleta::query();
+        $query = Bicicleta::query(); //monta e personaliza coluna
 
         if ($request->filled('tipo') && $request->filled('valor')) {
             $query->where($request->tipo, 'like', '%' . $request->valor . '%');
@@ -22,7 +22,7 @@ class BicicletaController extends Controller
 
     public function create()
     {
-        $dado = new Bicicleta();
+        $dado = new Bicicleta(); //cria objeto vazio
 
         return view('bicicleta.form', compact('dado'));
     }
@@ -52,8 +52,7 @@ class BicicletaController extends Controller
 
     public function edit($id)
     {
-        // Busca a bicicleta para preencher as informações no formulário
-        $dado = Bicicleta::findOrFail($id);
+        $dado = Bicicleta::findOrFail($id); // Busca a bicicleta para preencher as informações no formulário
 
         return view('bicicleta.form', compact('dado'));
     }

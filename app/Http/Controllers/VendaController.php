@@ -12,7 +12,7 @@ class VendaController extends Controller
 {
    public function index(Request $request)//listar
     {
-        $query = Venda::with(['usuario', 'funcionario', 'bicicleta', 'acessorio']);
+        $query = Venda::with(['usuario', 'funcionario', 'bicicleta', 'acessorio']); //carrega antecipadamente os dados pra evitar problema
 
         $tipo  = $request->input('tipo');
         $valor = $request->input('valor');

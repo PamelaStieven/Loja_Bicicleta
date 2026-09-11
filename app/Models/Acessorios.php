@@ -9,10 +9,9 @@ class Acessorios extends Model
 {
     use HasFactory;
 
-    // Define explicitamente o nome da tabela no banco de dados
     protected $table = 'acessorios';
 
-    protected $fillable = [
+    protected $fillable = [ //autoriza salvamento
         'nome',
         'preco',
         'quantidade',
