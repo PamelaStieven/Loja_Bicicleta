@@ -10,7 +10,7 @@ use App\Models\Acessorios;
 
 class VendaController extends Controller
 {
-   public function index(Request $request)
+   public function index(Request $request)//listar
     {
         $query = Venda::with(['usuario', 'funcionario', 'bicicleta', 'acessorio']);
 
