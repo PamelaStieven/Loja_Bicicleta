@@ -7,9 +7,7 @@ use App\Models\Bicicleta;
 
 class BicicletaSeeder extends Seeder
 {
-    /**
-     * Run the database seeds.
-     */
+    
     public function run(): void
     {
         Bicicleta::factory()->count(5)->create();

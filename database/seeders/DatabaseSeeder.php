@@ -12,5 +12,6 @@ class DatabaseSeeder extends Seeder {
         Usuario::factory(10)->create();
         Bicicleta::factory(10)->create();
         Acessorios::factory(10)->create();
+        Vendas::factory(10)->create();
     }
 }
