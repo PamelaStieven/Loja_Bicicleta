@@ -13,6 +13,7 @@ class DatabaseSeeder extends Seeder
             BicicletaSeeder::class,
             AcessoriosSeeder::class,
             VendaSeeder::class,
+            AcessoriosSegurancaSeeder::class,
         ]);
     }
 }

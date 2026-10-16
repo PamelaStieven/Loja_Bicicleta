@@ -15,4 +15,8 @@
        class="list-group-item list-group-item-action {{ request()->routeIs('venda.*') ? 'active' : '' }}">
         Vendas
     </a>
+     <a href="{{ route('acessoriosseguranca.index') }}" 
+       class="list-group-item list-group-item-action {{ request()->routeIs('acessoriosseguranca.*') ? 'active' : '' }}">
+        Acessórios de Segurança
+    </a>
 </div>

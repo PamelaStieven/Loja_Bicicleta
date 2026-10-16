@@ -5,6 +5,7 @@ use App\Http\Controllers\UsuarioController;
 use App\Http\Controllers\BicicletaController;
 use App\Http\Controllers\AcessoriosController;
 use App\Http\Controllers\VendaController;
+use App\Http\Controllers\AcessoriosSegurancaController;
 
 // 1. Redireciona a raiz (/) diretamente para o login
 Route::get('/', function () {
@@ -36,9 +37,11 @@ Route::post('usuario/search', [UsuarioController::class, 'index'])->name('usuari
 Route::post('bicicleta/search', [BicicletaController::class, 'index'])->name('bicicleta.search');
 Route::post('acessorios/search', [AcessoriosController::class, 'index'])->name('acessorios.search');
 Route::post('venda/search', [VendaController::class, 'index'])->name('venda.search');
+Route::post('acessoriosSeguranca/search', [\App\Http\Controllers\AcessoriosSegurancaController::class, 'index'])->name('acessoriosSeguranca.search');
 
 // Rotas CRUD
 Route::resource('usuario', UsuarioController::class)->names('usuario');
 Route::resource('bicicleta', BicicletaController::class)->names('bicicleta');
 Route::resource('acessorios', AcessoriosController::class)->names('acessorios');
 Route::resource('venda', VendaController::class)->names('venda');
+Route::resource('acessoriosSeguranca', \App\Http\Controllers\AcessoriosSegurancaController::class)->names('acessoriosSeguranca');

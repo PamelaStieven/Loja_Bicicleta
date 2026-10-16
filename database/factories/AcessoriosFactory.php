@@ -2,7 +2,7 @@
 
 namespace Database\Factories;
 
-use App\Models\Aluno;
+use App\Models\Acessorios;
 use Illuminate\Database\Eloquent\Factories\Factory;
 
 
