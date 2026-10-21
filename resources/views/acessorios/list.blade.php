@@ -12,7 +12,9 @@
             <label for="tipo" class="form-label">Tipo</label>
             <select name="tipo" id="tipo" class="form-select">
                 <option value="nome" {{ request('tipo') == 'nome' ? 'selected' : '' }}>Nome</option>
+                <option value="marca" {{ request('tipo') == 'marca' ? 'selected' : '' }}>Marca</option>
                 <option value="preco" {{ request('tipo') == 'preco' ? 'selected' : '' }}>Preço</option>
+                <option value="quantidade" {{ request('tipo') == 'quantidade' ? 'selected' : '' }}>Quantidade</option>
             </select>
         </div>
 
@@ -41,6 +43,7 @@
             <tr>
                 <th>ID</th>
                 <th>Nome</th>
+                <th>Marca</th>
                 <th>Preço</th>
                 <th>Estoque</th>
                 <th class="text-center">Ações</th>
@@ -51,6 +54,7 @@
                 <tr>
                     <td>{{ $item->id }}</td>
                     <td>{{ $item->nome }}</td>
+                    <td>{{ $item->marca }}</td>
                     <td>R$ {{ number_format($item->preco, 2, ',', '.') }}</td>
                     <td>{{ $item->quantidade ?? '-' }}</td>
                     <td class="text-center">

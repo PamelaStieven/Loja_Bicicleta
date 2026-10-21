@@ -13,6 +13,7 @@ class Acessorios extends Model
 
     protected $fillable = [ //autoriza salvamento
         'nome',
+        'marca',
         'preco',
         'quantidade',
     ];

@@ -64,6 +64,9 @@
                     <li class="nav-item">
                         <a class="nav-link" href="{{ route('acessoriosSeguranca.index') }}"><i class="bi bi-shield"></i> Acessórios de Segurança</a>
                     </li>
+                     <li class="nav-item">
+                        <a class="nav-link" href="{{ route('fornecedor.index') }}"><i class="bi bi-truck"></i> Fornecedores</a>
+                    </li>
                 </ul>
                 <div class="d-flex align-items-center gap-3">
                     <span class="text-light small"><i class="bi bi-person-circle"></i> Operador</span>

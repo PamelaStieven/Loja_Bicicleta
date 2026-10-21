@@ -14,6 +14,9 @@ class DatabaseSeeder extends Seeder
             AcessoriosSeeder::class,
             VendaSeeder::class,
             AcessoriosSegurancaSeeder::class,
+            FornecedorSeeder::class,
         ]);
+
+
     }
 }

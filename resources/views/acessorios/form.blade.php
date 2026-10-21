@@ -35,6 +35,15 @@
                         <label for="preco" class="form-label">Preço (R$) *</label>
                         <input type="number" step="0.01" name="preco" id="preco" class="form-control" value="{{ old('preco', $dado->preco ?? '') }}" required>
                     </div>
+                    
+                    <div class="col-md-3">
+                        <label for="preco" class="form-label">Preço (R$) *</label>
+                        <input type="number" step="0.01" name="preco" id="preco" class="form-control" value="{{ old('preco', $dado->preco ?? '') }}" required>
+                    </div>
+                    <div class="col-md-3">
+                        <label for="marca" class="form-label">Marca *</label>
+                        <input type="text" name="marca" id="marca" class="form-control" value="{{ old('marca', $dado->marca ?? '') }}" required>
+                    </div>
 
                     <div class="col-md-3">
                         <label for="quantidade" class="form-label">Quantidade</label>

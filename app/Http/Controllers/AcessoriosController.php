@@ -4,6 +4,7 @@ namespace App\Http\Controllers;
 
 use Illuminate\Http\Request;
 use App\Models\Acessorios;
+use App\Charts\AcessorioChart; // <--- Importação necessária do gráfico
 
 class AcessoriosController extends Controller
 {
@@ -29,10 +30,13 @@ class AcessoriosController extends Controller
     {
         $request->validate([
             'nome'      => 'required',
+            'marca'     => 'required',
             'preco'     => 'required|numeric',
             'quantidade' => 'required|integer|min:0',
+            
         ], [
             'nome.required'      => 'O nome é obrigatório.',
+            'marca.required'     => 'A marca é obrigatória.',
             'preco.required'     => 'O preço é obrigatório.',
             'quantidade.required' => 'A quantidade é obrigatória.',
             'quantidade.integer' => 'A quantidade deve ser um valor inteiro.',
@@ -86,4 +90,5 @@ class AcessoriosController extends Controller
 
         return view('acessorios.list', compact('dados'));
     }
+
 }

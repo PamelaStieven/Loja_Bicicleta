@@ -3,9 +3,8 @@
 
 @section('conteudo')
 <div class="container my-4">
-    <div class="d-flex justify-content-between align-items-center mb-3">
+    <div class="d-flex justify-content-between align-items-center mb-2">
         <h3>Vendas Registradas</h3>
-        <a href="{{ route('venda.create') }}" class="btn btn-primary">+ Nova Venda</a>
     </div>
 
     {{-- Barra de Busca --}}
@@ -27,7 +26,11 @@
         >
 
         <button type="submit" class="btn btn-primary">Buscar</button>
-        <a href="{{ route('venda.index') }}" class="btn btn-secondary">Limpar</a>
+         <a href="{{ url('venda/index') }}" class="btn btn-secondary">Limpar</a>
+         <a href="{{ url('venda/create') }}" class="btn btn-success ms-auto">Novo</a>
+         <a href="{{ url('venda/report') }}" class="btn btn-info text-white"> Relatório</a>
+         <a href="{{ url('venda/chart') }}" class="btn btn-warning"> Gráfico </a>
+
     </form>
 
     @if(session('success'))

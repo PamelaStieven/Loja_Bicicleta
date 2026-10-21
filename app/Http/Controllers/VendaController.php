@@ -7,6 +7,8 @@ use App\Models\Venda;
 use App\Models\Usuario;
 use App\Models\Bicicleta;
 use App\Models\Acessorios;
+use App\Charts\VendaChart;       
+use App\Charts\FornecedorChart;  
 
 class VendaController extends Controller
 {
@@ -21,13 +23,13 @@ class VendaController extends Controller
             switch ($tipo) {
                 case 'usuario':
                     $query->whereHas('usuario', function ($q) use ($valor) {
-                        $q->where('nome', 'like', "%{$valor}%"); // Removido o orWhere('name')
+                        $q->where('nome', 'like', "%{$valor}%"); 
                     });
                     break;
 
                 case 'funcionario':
                     $query->whereHas('funcionario', function ($q) use ($valor) {
-                        $q->where('nome', 'like', "%{$valor}%"); // Removido o orWhere('name')
+                        $q->where('nome', 'like', "%{$valor}%"); 
                     });
                     break;
 
@@ -89,8 +91,7 @@ class VendaController extends Controller
 
     public function edit($id)
     {
-        // Renomeado para $venda para bater com a view form.blade.php
-        $venda        = Venda::findOrFail($id); 
+        $venda        = Venda::findOrFail(); 
         $usuarios     = Usuario::all();
         $funcionarios = Usuario::all();
         $bicicletas   = Bicicleta::all();
@@ -125,5 +126,17 @@ class VendaController extends Controller
         Venda::destroy($id);
 
         return redirect()->route('venda.index')->with('success', 'Venda removida com sucesso!');
+    }
+    
+    public function relatorioVendas(VendaChart $chart)
+    {
+        $vendas = Venda::with(['usuario', 'bicicleta', 'acessorio'])->get();
+        return view('venda.relatorio', ['chart' => $chart->build(), 'vendas' => $vendas]);
+    }
+
+    public function relatorioFornecedores(FornecedorChart $chart)
+    {
+        $fornecedores = \App\Models\Fornecedor::all();
+        return view('fornecedor.relatorio', ['chart' => $chart->build(), 'fornecedores' => $fornecedores]);
     }
 }
