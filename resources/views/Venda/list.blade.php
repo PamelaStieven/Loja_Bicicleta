@@ -26,11 +26,9 @@
         >
 
         <button type="submit" class="btn btn-primary">Buscar</button>
-         <a href="{{ url('venda/index') }}" class="btn btn-secondary">Limpar</a>
-         <a href="{{ url('venda/create') }}" class="btn btn-success ms-auto">Novo</a>
-         <a href="{{ url('venda/report') }}" class="btn btn-info text-white"> Relatório</a>
-         <a href="{{ url('venda/chart') }}" class="btn btn-warning"> Gráfico </a>
-
+        <a href="{{ route('venda.index') }}" class="btn btn-secondary">Limpar</a>
+        <a href="{{ route('venda.create') }}" class="btn btn-success ms-auto">Novo</a>
+        
     </form>
 
     @if(session('success'))
@@ -76,6 +74,15 @@
                         >
                             Editar
                         </a>
+
+                        <a 
+                            href="{{ route('venda.itens', $item->id) }}" 
+                            class="btn btn-info btn-sm text-white" 
+                            title="Ver Itens"
+                        >
+                            Itens
+                        </a>
+
                         <form action="{{ route('venda.destroy', $item->id) }}" method="POST" class="d-inline">
                             @csrf
                             @method('DELETE')

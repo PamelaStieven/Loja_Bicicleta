@@ -40,4 +40,9 @@ class Venda extends Model
     {
         return $this->belongsTo(Acessorios::class, 'acessorio_id');
     }
+
+    public function itens()
+    {
+    return $this->hasMany(ItemVenda::class, 'venda_id');
+    }
 }

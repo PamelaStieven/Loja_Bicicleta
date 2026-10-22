@@ -8,34 +8,19 @@ use App\Http\Controllers\VendaController;
 use App\Http\Controllers\AcessoriosSegurancaController;
 use App\Http\Controllers\FornecedorController;
 
-// 1. Redireciona a raiz (/) diretamente para o login
-Route::get('/', function () {
-    return redirect()->route('login');
+Route::get('/', function () {return redirect()->route('login');
 });
 
-// 2. Exibe a tela de login (MÉTODO GET)
-Route::get('/login', function () {
-    return view('auth.login');
-})->name('login');
+Route::get('/login', function () { return view('auth.login');})->name('login');
 
-// 3. Processa os dados do formulário de login (MÉTODO POST)
-Route::post('/login', function () {
-    return redirect()->route('bicicleta.index');
-})->name('login.post');
 
-// 4. Exibe a tela de cadastro (MÉTODO GET)
-Route::get('/register', function () {
-    return view('auth.register');
-})->name('register');
+Route::post('/login', function () {return redirect()->route('bicicleta.index');})->name('login.post');
 
-// 5. Processa o cadastro (MÉTODO POST)
-Route::post('/register', function () {
-    return redirect()->route('login')->with('success', 'Cadastro realizado com sucesso! Faça login.');
-})->name('register.post');
+Route::get('/register', function () {return view('auth.register');})->name('register');
 
-// ==========================================
-// ROTAS ESPECÍfICAS (DEVEM FICAR SEMPRE ANTES DOS RESOURCES)
-// ==========================================
+Route::post('/register', function () {return redirect()->route('login')->with('success', 'Cadastro realizado com sucesso! Faça login.');})->name('register.post');
+
+
 Route::get('/fornecedor/report', [FornecedorController::class, 'chart'])->name('fornecedor.report');
 Route::get('/fornecedor/chart', [FornecedorController::class, 'chart'])->name('fornecedor.chart');
 
@@ -54,3 +39,5 @@ Route::resource('acessorios', AcessoriosController::class)->names('acessorios');
 Route::resource('venda', VendaController::class)->names('venda');
 Route::resource('acessoriosSeguranca', \App\Http\Controllers\AcessoriosSegurancaController::class)->names('acessoriosSeguranca');
 Route::resource('fornecedor', FornecedorController::class)->names('fornecedor');
+
+Route::get('/venda/{id}/itens', [VendaController::class, 'showItens'])->name('venda.itens');

@@ -48,11 +48,7 @@
                     <div class="col-md-3">
                         <label for="endereco" class="form-label">Endereço *</label>
                         <input type="text" name="endereco" id="endereco" class="form-control" value="{{ old('endereco', $dado->endereco ?? '') }}" required>
-                    </div>
-                     <div class="col-md-3">
-                        <label for="endereco" class="form-label">Endereço *</label>
-                        <input type="text" name="endereco" id="endereco" class="form-control" value="{{ old('endereco', $dado->endereco ?? '') }}" required>
-                    </div>
+                    
                      <div class="col-md-3">
                         <label for="prazo_entrega" class="form-label">Prazo de Entrega (dias)</label>
                         <input type="number" name="prazo_entrega" id="prazo_entrega" class="form-control" value="{{ old('prazo_entrega', $dado->prazo_entrega ?? '') }}" min="0">
