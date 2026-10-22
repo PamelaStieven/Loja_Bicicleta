@@ -45,3 +45,6 @@ Route::resource('acessoriosSeguranca', \App\Http\Controllers\AcessoriosSeguranca
 Route::resource('fornecedor', FornecedorController::class)->names('fornecedor');
 
 Route::get('/venda/{id}/itens', [VendaController::class, 'showItens'])->name('venda.itens');
+
+Route::post('categoria/search', [CategoriaController::class, 'index'])->name('categoria.search');
+Route::resource('categoria', CategoriaController::class)->names('categoria');

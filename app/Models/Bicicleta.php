@@ -16,5 +16,6 @@ class Bicicleta extends Model
         'cor',
         'aro',
         'quantidade',
+        'categoria',
     ];
 }
