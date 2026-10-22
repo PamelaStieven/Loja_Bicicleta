@@ -5,6 +5,9 @@ namespace Database\Seeders;
 use Illuminate\Database\Seeder;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Schema;
+use App\Models\Venda;
+use App\Models\ItemVenda;
+use App\Models\Bicicleta;
 
 class VendaSeeder extends Seeder
 {
@@ -13,26 +16,42 @@ class VendaSeeder extends Seeder
         // Desativa checagem de chave estrangeira temporariamente
         Schema::disableForeignKeyConstraints();
 
-        $vendas = [];
+        // Limpa as tabelas antes de popular
+        ItemVenda::truncate();
+        Venda::truncate();
 
         for ($i = 1; $i <= 10; $i++) {
             $quantidade = rand(1, 3);
-            $valorUnitario = rand(500, 2500);
+            $bicicletaId = rand(1, 5);
+            
+            // Pega o preço real da bicicleta ou define um padrão
+            $bicicleta = Bicicleta::find($bicicletaId);
+            $precoUnitario = $bicicleta ? ($bicicleta->preco ?? 1500) : 1500;
+            $valorTotal = $quantidade * $precoUnitario;
 
-            $vendas[] = [
-                'usuario_id'   => rand(1, 5),
-                'bicicleta_id' => rand(1, 5),
+            // 1. Cria a venda principal
+            $venda = Venda::create([
+                'usuario_id'     => rand(1, 5),
                 'funcionario_id' => rand(1, 5),
+                'valor_total'    => $valorTotal,
+                'data_venda'     => now()->subDays(rand(1, 30)),
+                'created_at'     => now(),
+                'updated_at'     => now(),
+            ]);
+
+            // 2. Cria o item correspondente na tabela 1:N (item_vendas)
+            ItemVenda::create([
+                'venda_id'     => $venda->id,
+                'bicicleta_id' => $bicicletaId,
+                'acessorio_id' => null,
                 'quantidade'   => $quantidade,
-                'valor_total'  => $quantidade * $valorUnitario,
-                'data_venda'   => now()->subDays(rand(1, 30)),
+                'preco_unitario' => $precoUnitario,
                 'created_at'   => now(),
                 'updated_at'   => now(),
-            ];
+            ]);
         }
 
-        DB::table('venda')->insert($vendas);
-
+        // Reativa checagem de chave estrangeira
         Schema::enableForeignKeyConstraints();
     }
 }

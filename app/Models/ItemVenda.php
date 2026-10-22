@@ -15,7 +15,7 @@ class ItemVenda extends Model
         'bicicleta_id',
         'acessorio_id',
         'quantidade',
-        'preco_unitario',
+        'valor_total',
     ];
 
     public function venda()

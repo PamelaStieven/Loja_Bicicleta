@@ -29,14 +29,14 @@
                     @php $totalGeral = 0; @endphp
                     @forelse($venda->itens as $detalhe)
                         @php 
-                            $subtotal = $detalhe->quantidade * $detalhe->preco_unitario;
+                            $subtotal = $detalhe->quantidade * $detalhe->valor_total;
                             $totalGeral += $subtotal;
                             $nomeProduto = $detalhe->bicicleta->modelo ?? $detalhe->acessorio->nome ?? 'Produto';
                         @endphp
                         <tr>
                             <td>{{ $nomeProduto }}</td>
                             <td>{{ $detalhe->quantidade }}</td>
-                            <td>R$ {{ number_format($detalhe->preco_unitario, 2, ',', '.') }}</td>
+                            <td>R$ {{ number_format($detalhe->valor_total, 2, ',', '.') }}</td>
                             <td>R$ {{ number_format($subtotal, 2, ',', '.') }}</td>
                         </tr>
                     @empty

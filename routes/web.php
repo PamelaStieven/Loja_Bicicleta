@@ -21,8 +21,12 @@ Route::get('/register', function () {return view('auth.register');})->name('regi
 Route::post('/register', function () {return redirect()->route('login')->with('success', 'Cadastro realizado com sucesso! Faça login.');})->name('register.post');
 
 
-Route::get('/fornecedor/report', [FornecedorController::class, 'chart'])->name('fornecedor.report');
+Route::get('/fornecedor/report', [FornecedorController::class, 'report'])->name('fornecedor.report');
 Route::get('/fornecedor/chart', [FornecedorController::class, 'chart'])->name('fornecedor.chart');
+
+
+Route::get('/venda/report', [VendaController::class, 'report'])->name('venda.report');
+Route::get('/venda/chart', [VendaController::class, 'RelatorioVenda'])->name('venda.chart');
 
 // Rotas de Busca
 Route::post('usuario/search', [UsuarioController::class, 'index'])->name('usuario.search');

@@ -28,7 +28,8 @@
         <button type="submit" class="btn btn-primary">Buscar</button>
         <a href="{{ route('venda.index') }}" class="btn btn-secondary">Limpar</a>
         <a href="{{ route('venda.create') }}" class="btn btn-success ms-auto">Novo</a>
-        
+        <a href="{{ route('venda.chart') }}" class="btn btn-info ms-auto">Grafico</a>
+        <a href="{{ route('venda.report') }}" class="btn btn-info ms-auto">Relatórios</a>
     </form>
 
     @if(session('success'))
