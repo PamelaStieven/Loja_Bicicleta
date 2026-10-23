@@ -6,6 +6,7 @@ use Illuminate\Http\Request;
 use App\Models\Fornecedor;
 use App\Charts\FornecedorChart;
 use Barryvdh\DomPDF\Facade\Pdf; 
+use Illuminate\Validation\Rule; 
 
 class FornecedorController extends Controller
 {
@@ -37,7 +38,8 @@ class FornecedorController extends Controller
         return view('fornecedor.form', compact('dado'));
     }
 
-    private function validateForm(Request $request)
+    // 1. Adicionado '$id = null' para aceitar o ID opcionalmente
+    private function validateForm(Request $request, $id = null)
     {
         $request->validate([
             'nome'          => 'required|string|max:255',
@@ -45,12 +47,15 @@ class FornecedorController extends Controller
             'email'         => 'required|string|max:255',
             'telefone'      => 'required|string|max:20',
             'endereco'      => 'required|string|max:255',
-            'cnpj'          => 'required|string|max:18',
+            'cnpj'          => [
+                'required',
+                Rule::unique('fornecedor', 'cnpj')->ignore($id), // 2. Agora usa o $id recebido aqui
+            ],
             'prazo_entrega' => 'nullable|integer|min:0',
             'valor'         => 'nullable|numeric|min:0',
             'funcionario_id' => 'nullable|exists:users,id',
-            'status' => 'nullable|string|max:50',
-            'link_site' => 'nullable|url|max:255',
+            'status'        => 'nullable|string|max:50',
+            'link_site'     => 'nullable|url|max:255',
             'redes_sociais' => 'nullable|string|max:255',
         ], [
             'nome.required'         => 'O nome do fornecedor é obrigatório.',
@@ -59,6 +64,7 @@ class FornecedorController extends Controller
             'telefone.required'     => 'O telefone é obrigatório.',
             'endereco.required'     => 'O endereço é obrigatório.',
             'cnpj.required'         => 'O CNPJ é obrigatório.',
+            'cnpj.unique'           => 'O CNPJ informado já está cadastrado.',
             'prazo_entrega.integer' => 'O prazo de entrega deve ser um número inteiro.',
             'valor.numeric'         => 'O valor deve ser um número.',
             'funcionario_id.exists' => 'O funcionário selecionado não existe.',
@@ -70,7 +76,7 @@ class FornecedorController extends Controller
 
     public function store(Request $request)
     {
-        $this->validateForm($request);
+        $this->validateForm($request); // No cadastro não precisa de ID
 
         Fornecedor::create($request->all());
 
@@ -84,9 +90,10 @@ class FornecedorController extends Controller
         return view('fornecedor.form', compact('dado'));
     }
 
+    // 3. Adicionado '$id' na assinatura da função update
     public function update(Request $request, $id)
     {
-        $this->validateForm($request);
+        $this->validateForm($request, $id); // 4. Passado o $id para o validateForm
 
         $fornecedor = Fornecedor::findOrFail($id);
         $fornecedor->update($request->all());

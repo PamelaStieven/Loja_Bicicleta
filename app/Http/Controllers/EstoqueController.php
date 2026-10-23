@@ -44,8 +44,9 @@ class EstoqueController extends Controller
 
     public function edit($id)
     {
-        $data = Estoque::findOrFail($id);
-        return view('Estoque.form', compact('data'));
+        // Alterado de $data para $estoque para padronizar com a view
+        $estoque = Estoque::findOrFail($id);
+        return view('Estoque.form', compact('estoque'));
     }
 
     public function update(Request $request, $id)
