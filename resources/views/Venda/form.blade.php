@@ -70,6 +70,7 @@
                             <option value="{{ $bicicleta->id }}" data-tipo="bicicleta" data-nome="{{ $bicicleta->modelo ?? $bicicleta->nome }}" data-preco="{{ $bicicleta->preco ?? 0 }}">
                                 {{ $bicicleta->modelo ?? $bicicleta->nome }} - R$ {{ number_format($bicicleta->preco ?? 0, 2, ',', '.') }}
                             </option>
+                            //percorre a lista de bicicletas e cria uma opção para cada uma.
                         @endforeach
                         @foreach($acessorios ?? [] as $acessorio)
                             <option value="{{ $acessorio->id }}" data-tipo="acessorio" data-nome="{{ $acessorio->nome }}" data-preco="{{ $acessorio->preco ?? 0 }}" style="display:none;">
@@ -99,8 +100,10 @@
                     </tr>
                 </thead>
                 <tbody>
+                    //Verifica se a venda que está sendo editada já possui itens e, se possuir, percorre cada
                     @if(isset($data) && $data->itens)
                         @foreach($data->itens as $index => $detalhe)
+                        //Identifica o produto e calcular o subtotal
                             @php
                                 $prodObj = $detalhe->bicicleta ?? $detalhe->acessorio;
                                 $tipoItem = $detalhe->bicicleta_id ? 'bicicleta' : 'acessorio';
@@ -108,6 +111,7 @@
                                 $precoUnit = $detalhe->preco_unitario ?? $prodObj->preco ?? 0;
                                 $subtotal = $precoUnit * $detalhe->quantidade;
                             @endphp
+                            //Monta uma linha da tabela para cada item que já existe na venda.
                             <tr>
                                 <td>
                                     {{ $nomeProd }}
@@ -147,6 +151,8 @@
     </div>
 
 <script>
+    // Função para lidar com a adição e remoção de itens na tabela
+    //espera a página terminar de carregar antes de executar as ações do JavaScript.
     document.addEventListener('DOMContentLoaded', function () {
         const tipoSelect = document.getElementById('tipo_produto');
         const produtoSelect = document.getElementById('produto_select');
@@ -154,6 +160,7 @@
         const tabelaCorpo = document.querySelector('#tabela-itens tbody');
         const inputValorTotal = document.getElementById('valor_total');
 
+        //Verifica o tipo escolhido e tenta ocultar as opções que não foram
         function filtrarOpcoes() {
             const tipoEscolhido = tipoSelect.value;
             Array.from(produtoSelect.options).forEach((opt, index) => {
