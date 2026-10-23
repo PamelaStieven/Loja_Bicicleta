@@ -45,6 +45,8 @@
                 <th>Valor Total</th>
                 <th>Data</th>
                 <th class="text-center">Ações</th>
+                <th class="text-center">Ações</th>
+                <th class="text-center">Ações</th>
             </tr>
         </thead>
         <tbody>
@@ -66,7 +68,8 @@
                         >
                             Editar
                         </a>
-
+                    </td>
+                    <td class="text-center">
                         <a 
                             href="{{ route('venda.itens', $item->id) }}" 
                             class="btn btn-info btn-sm text-white" 
@@ -74,7 +77,8 @@
                         >
                             Itens
                         </a>
-
+                    </td>
+                    <td class="text-center">
                         <form action="{{ route('venda.destroy', $item->id) }}" method="POST" class="d-inline">
                             @csrf
                             @method('DELETE')

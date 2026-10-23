@@ -45,7 +45,8 @@
                 <th>Telefone</th>
                 <th>Tipo</th>
                 <th>CPF</th>
-                <th class="text-center" colspan="2">Ações</th>
+                <th class="text-center" >Ações</th>
+                <th class="text-center" >Ações</th>
             </tr>
         </thead>
         <tbody>

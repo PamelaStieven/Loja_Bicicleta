@@ -60,7 +60,8 @@
                         <th>Cor</th>
                         <th>Aro</th>
                         <th>Qtd</th>
-                        <th class="text-center" colspan="2">Ações</th>
+                        <th class="text-center">Ações</th>
+                        <th class="text-center">Ações</th>
                     </tr>
                 </thead>
 
