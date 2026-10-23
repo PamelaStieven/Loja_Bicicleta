@@ -100,10 +100,10 @@
                     </tr>
                 </thead>
                 <tbody>
-                    //Verifica se a venda que está sendo editada já possui itens e, se possuir, percorre cada
+                    {{--Verifica se a venda que está sendo editada já possui itens e, se possuir, percorre cada--}}
                     @if(isset($data) && $data->itens)
                         @foreach($data->itens as $index => $detalhe)
-                        //Identifica o produto e calcular o subtotal
+                        {{--Identifica o produto e calcular o subtotal--}}
                             @php
                                 $prodObj = $detalhe->bicicleta ?? $detalhe->acessorio;
                                 $tipoItem = $detalhe->bicicleta_id ? 'bicicleta' : 'acessorio';
@@ -111,7 +111,7 @@
                                 $precoUnit = $detalhe->preco_unitario ?? $prodObj->preco ?? 0;
                                 $subtotal = $precoUnit * $detalhe->quantidade;
                             @endphp
-                            //Monta uma linha da tabela para cada item que já existe na venda.
+                            {{--Monta uma linha da tabela para cada item que já existe na venda.--}}
                             <tr>
                                 <td>
                                     {{ $nomeProd }}
