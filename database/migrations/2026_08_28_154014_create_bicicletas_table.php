@@ -11,6 +11,7 @@ return new class extends Migration
     {
         Schema::create('bicicletas', function (Blueprint $table) {
             $table->id();
+            $table->string('foto')->nullable();
             $table->string('marca');
             $table->string('modelo');
             $table->decimal('preco', 10, 2);

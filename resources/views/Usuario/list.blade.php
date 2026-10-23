@@ -5,7 +5,8 @@
 <div class="container my-4">
 <div class="row mb-3">
     <h3>Listagem de Usuários</h3>
-    <form action="{{ route('usuario.index') }}" method="GET">
+    <form action="{{ route('usuario.search') }}" method="POST">
+        @csrf
         <div class="row align-items-end g-2">
             <div class="col-md-3">
                 <label for="tipo" class="form-label">Tipo</label>

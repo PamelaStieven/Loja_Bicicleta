@@ -7,14 +7,14 @@
         <h3>Vendas Registradas</h3>
     </div>
 
-    {{-- Barra de Busca --}}
-    <form action="{{ route('venda.index') }}" method="GET" class="d-flex gap-2 my-3">
+   {{-- Barra de Busca --}}
+    <form action="{{ route('venda.search') }}" method="POST" class="d-flex gap-2 my-3">
+        @csrf
         <select name="tipo" class="form-select w-auto">
-            <option value="usuario" {{ request('tipo') == 'usuario' ? 'selected' : '' }}>Usuário</option>
-            <option value="funcionario" {{ request('tipo') == 'funcionario' ? 'selected' : '' }}>Funcionário</option>
-            <option value="item" {{ request('tipo') == 'item' ? 'selected' : '' }}>Item</option>
-            <option value="quantidade" {{ request('tipo') == 'quantidade' ? 'selected' : '' }}>Quantidade</option>
-            <option value="data" {{ request('tipo') == 'data' ? 'selected' : '' }}>Data</option>
+            <option value="usuario" {{ old('tipo', request('tipo')) == 'usuario' ? 'selected' : '' }}>Usuário</option>
+            <option value="funcionario" {{ old('tipo', request('tipo')) == 'funcionario' ? 'selected' : '' }}>Funcionário</option>
+            <option value="quantidade" {{ old('tipo', request('tipo')) == 'quantidade' ? 'selected' : '' }}>Quantidade de Itens</option>
+            <option value="data" {{ old('tipo', request('tipo')) == 'data' ? 'selected' : '' }}>Data (AAAA-MM-DD)</option>
         </select>
 
         <input 
@@ -22,14 +22,14 @@
             name="valor" 
             class="form-control" 
             placeholder="Digite para pesquisar..." 
-            value="{{ request('valor') }}"
+            value="{{ old('valor', request('valor')) }}"
         >
 
         <button type="submit" class="btn btn-primary">Buscar</button>
         <a href="{{ route('venda.index') }}" class="btn btn-secondary">Limpar</a>
-        <a href="{{ route('venda.create') }}" class="btn btn-success ms-auto">Novo</a>
-        <a href="{{ route('venda.chart') }}" class="btn btn-info ms-auto">Grafico</a>
-        <a href="{{ route('venda.report') }}" class="btn btn-info ms-auto">Relatórios</a>
+        <a href="{{ route('venda.create') }}" class="btn btn-success ">Novo</a>
+        <a href="{{ route('venda.chart') }}" class="btn btn-info">Gráfico</a>
+        <a href="{{ route('venda.report') }}" class="btn btn-warning">Relatórios</a>
     </form>
 
     @if(session('success'))
@@ -42,8 +42,7 @@
                 <th>ID</th>
                 <th>Usuário</th>
                 <th>Funcionário</th>
-                <th>Item</th>
-                <th>Qtd</th>
+                <th>Qtd de Itens</th>
                 <th>Valor Total</th>
                 <th>Data</th>
                 <th class="text-center">Ações</th>
@@ -55,18 +54,12 @@
                     <td>{{ $item->id }}</td>
                     <td>{{ $item->usuario->nome ?? '-' }}</td>
                     <td>{{ $item->funcionario->nome ?? '-' }}</td>
-                    <td>
-                        @if($item->bicicleta)
-                            Bicicleta: {{ $item->bicicleta->modelo ?? $item->bicicleta->nome ?? '' }}
-                        @elseif($item->acessorio)
-                            Acessório: {{ $item->acessorio->nome }}
-                        @else
-                            -
-                        @endif
-                    </td>
-                    <td>{{ $item->quantidade }}</td>
+                    
+                    {{-- CORRIGIDO: Soma a quantidade total dos itens da venda --}}
+                    <td>{{ $item->itens->sum('quantidade') }}</td>
+                    
                     <td>R$ {{ number_format($item->valor_total, 2, ',', '.') }}</td>
-                    <td>{{ \Carbon\Carbon::parse($item->data_venda)->format('d/m/Y') }}</td>
+                    <td>{{ $item->data_venda ? \Carbon\Carbon::parse($item->data_venda)->format('d/m/Y') : '-' }}</td>
                     <td class="text-center">
                         <a 
                             href="{{ route('venda.edit', $item->id) }}" 
@@ -93,7 +86,7 @@
                 </tr>
             @empty
                 <tr>
-                    <td colspan="8" class="text-center">Nenhuma venda registrada.</td>
+                    <td colspan="7" class="text-center">Nenhuma venda registrada.</td>
                 </tr>
             @endforelse
         </tbody>

@@ -47,6 +47,7 @@
                 <th>Preço</th>
                 <th>Estoque</th>
                 <th class="text-center">Ações</th>
+                <th class="text-center">Ações</th>
             </tr>
         </thead>
         <tbody>
@@ -65,22 +66,24 @@
                         >
                             Editar
                         </a>
-                        <form
-                            action="{{ route('acessorios.destroy', $item->id) }}"
-                            method="POST"
-                            class="d-inline"
-                        >
-                            @csrf
-                            @method('DELETE')
-                            <button
-                                type="submit"
-                                class="btn btn-danger btn-sm"
-                                title="Excluir"
-                                onclick="return confirm('Deseja realmente excluir?')"
+                        <td class="text-center">
+                            <form
+                                action="{{ route('acessorios.destroy', $item->id) }}"
+                                method="POST"
+                                class="d-inline"
                             >
-                                Deletar
-                            </button>
-                        </form>
+                                @csrf
+                                @method('DELETE')
+                                <button
+                                    type="submit"
+                                    class="btn btn-danger btn-sm"
+                                    title="Excluir"
+                                    onclick="return confirm('Deseja realmente excluir?')"
+                                >
+                                    Deletar
+                                </button>
+                            </form>
+                        </td>
                     </td>
                 </tr>
             @empty

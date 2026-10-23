@@ -1,4 +1,5 @@
 <?php
+
 namespace App\Models;
 
 use Illuminate\Database\Eloquent\Factories\HasFactory;
@@ -15,13 +16,9 @@ class ItemVenda extends Model
         'bicicleta_id',
         'acessorio_id',
         'quantidade',
-        'valor_total',
+        'preco_unitario',
+        'valor_total', // <--- Adicionado
     ];
-
-    public function venda()
-    {
-        return $this->belongsTo(Venda::class, 'venda_id');
-    }
 
     public function bicicleta()
     {
@@ -31,5 +28,10 @@ class ItemVenda extends Model
     public function acessorio()
     {
         return $this->belongsTo(Acessorios::class, 'acessorio_id');
+    }
+
+    public function venda()
+    {
+        return $this->belongsTo(Venda::class, 'venda_id');
     }
 }

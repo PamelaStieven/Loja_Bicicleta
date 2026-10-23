@@ -11,10 +11,10 @@
         </div>
     </div>
 
-    <!-- Bloco do Gráfico Larapex -->
+    <!-- Bloco do Gráfico Larapex com altura mínima definida -->
     <div class="card shadow-sm mb-4">
         <div class="card-header bg-dark text-white">Visualização Gráfica</div>
-        <div class="card-body text-center">
+        <div class="card-body text-center" style="min-height: 350px;">
             {!! $chart->container() !!}
         </div>
     </div>
@@ -27,7 +27,7 @@
                 <thead>
                     <tr>
                         <th>ID</th>
-                        <th>Nome Fantasia</th>
+                        <th>Nome Fornecedor</th>
                         <th>Produto</th>
                         <th>Email</th>
                         <th>Telefone</th>
@@ -38,7 +38,7 @@
                     @foreach($fornecedores as $item)
                     <tr>
                         <td>{{ $item->id }}</td>
-                        <td>{{ $item->nome_fantasia }}</td>
+                        <td>{{ $item->nome }}</td>
                         <td>{{ $item->produto }}</td>
                         <td>{{ $item->email }}</td>
                         <td>{{ $item->telefone }}</td>
@@ -51,7 +51,7 @@
     </div>
 </div>
 
-<!-- Scripts obrigatórios do Larapex Charts -->
+<!-- Scripts obrigatórios do Larapex Charts carregados diretamente -->
 <script src="{{ $chart->cdn() }}"></script>
 {!! $chart->script() !!}
 @endsection

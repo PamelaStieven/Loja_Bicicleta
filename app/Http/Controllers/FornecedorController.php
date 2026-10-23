@@ -4,46 +4,70 @@ namespace App\Http\Controllers;
 
 use Illuminate\Http\Request;
 use App\Models\Fornecedor;
-use App\Charts\FornecedorChart; 
+use App\Charts\FornecedorChart;
+use Barryvdh\DomPDF\Facade\Pdf; 
 
 class FornecedorController extends Controller
 {
     public function index(Request $request)
     {
-        $query = Fornecedor::query();
+        // Lê os valores vindo de GET ou POST
+        $valor = $request->input('valor');
+        $tipo  = $request->input('tipo', 'nome');
 
-        if ($request->filled('tipo') && $request->filled('valor')) {
-            $query->where($request->tipo, 'like', '%' . $request->valor . '%');
-        }
+        $dados = Fornecedor::when(!empty($valor), function ($query) use ($tipo, $valor) {
+            $query->where($tipo, 'like', '%' . $valor . '%');
+        })->get();
 
-        $dados = $query->get();
+        return view('fornecedor.list', [
+            'dados' => $dados,
+            'tipo'  => $tipo,
+            'valor' => $valor
+        ]);
+    }
 
-        return view('fornecedor.list', compact('dados'));
+    public function search(Request $request)
+    {
+        // Executa diretamente a busca processando os dados via POST
+        return $this->index($request);
     }
 
     public function create()
     {
-        return view('fornecedor.form');
+        $dado = new Fornecedor(); 
+
+        return view('fornecedor.form', compact('dado'));
     }
 
     private function validateForm(Request $request)
     {
         $request->validate([
-            'nome_fantasia'    => 'required|string|max:255',
-            'produto'    => 'required|string|max:255',
-            'email'    => 'required|string|max:255',
-            'telefone' => 'required|string|max:20',
-            'endereco' => 'required|string|max:255',
+            'nome'          => 'required|string|max:255',
+            'produto'       => 'required|string|max:255',
+            'email'         => 'required|string|max:255',
+            'telefone'      => 'required|string|max:20',
+            'endereco'      => 'required|string|max:255',
+            'cnpj'          => 'required|string|max:18|unique:fornecedor,cnpj',
             'prazo_entrega' => 'nullable|integer|min:0',
-            'valor' => 'nullable|numeric|min:0',
+            'valor'         => 'nullable|numeric|min:0',
+            'funcionario_id' => 'nullable|exists:users,id',
+            'status' => 'nullable|string|max:50',
+            'link_site' => 'nullable|url|max:255',
+            'redes_sociais' => 'nullable|string|max:255',
         ], [
-            'nome_fantasia.required'    => 'O nome fantasia do fornecedor é obrigatório.',
-            'produto.required'    => 'O produto do fornecedor é obrigatório.',
-            'email.required'    => 'O email é obrigatório.',
-            'telefone.required' => 'O telefone é obrigatório.',
-            'endereco.required' => 'O endereço é obrigatório.',
+            'nome.required'         => 'O nome do fornecedor é obrigatório.',
+            'produto.required'      => 'O produto do fornecedor é obrigatório.',
+            'email.required'        => 'O email é obrigatório.',
+            'telefone.required'     => 'O telefone é obrigatório.',
+            'endereco.required'     => 'O endereço é obrigatório.',
+            'cnpj.required'         => 'O CNPJ é obrigatório.',
+            'cnpj.unique'           => 'O CNPJ informado já está cadastrado.',
             'prazo_entrega.integer' => 'O prazo de entrega deve ser um número inteiro.',
-            'valor.numeric' => 'O valor deve ser um número.',
+            'valor.numeric'         => 'O valor deve ser um número.',
+            'funcionario_id.exists' => 'O funcionário selecionado não existe.',
+            'status.required'       => 'O status é obrigatório.',
+            'link_site.url'         => 'O link do site deve ser uma URL válida.',
+            'redes_sociais.max'     => 'O campo de redes sociais deve ter no máximo 255 caracteres.',
         ]);
     }
 
@@ -80,21 +104,18 @@ class FornecedorController extends Controller
         return redirect()->route('fornecedor.index')->with('success', 'Fornecedor removido com sucesso!');
     }
 
-    public function search(Request $request)
+    public function report()
     {
-        if (!empty($request->valor)) {
-            $dados = Fornecedor::where(
-                $request->tipo ?? 'nome_fantasia',
-                'like',
-                "%$request->valor%"
-            )->get();
-        } else {
-            $dados = Fornecedor::all();
-        }
-
-        return view('fornecedor.list', compact('dados'));
+        $fornecedores = Fornecedor::all();
+        $data = [
+            'titulo' => 'Relatório Listagem de Fornecedores',
+            'date'   => date('d/m/Y'),
+            'dados'  => $fornecedores
+        ];
+        $pdf = Pdf::loadView('fornecedor.report', $data);
+        return $pdf->download('relatorio_fornecedores.pdf');
     }
-
+    
     public function chart(FornecedorChart $chart)
     {
         $fornecedores = Fornecedor::all();

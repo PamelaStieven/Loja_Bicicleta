@@ -6,22 +6,20 @@ use Illuminate\Support\Facades\Schema;
 
 return new class extends Migration
 {
-   public function up(): void
-{
-    Schema::create('item_vendas', function (Blueprint $table) {
-        $table->id();
-        $table->unsignedBigInteger('venda_id');
-        $table->unsignedBigInteger('bicicleta_id')->nullable();
-        $table->unsignedBigInteger('acessorio_id')->nullable();
-        $table->integer('quantidade');
-        $table->decimal('preco_unitario', 10, 2);
-        $table->timestamps();
+    public function up(): void
+    {
+        Schema::create('item_vendas', function (Blueprint $table) {
+            $table->id();
+            $table->foreignId('venda_id')->constrained('venda')->onDelete('cascade');
+            $table->foreignId('bicicleta_id')->nullable()->constrained('bicicletas')->onDelete('set null');
+            $table->foreignId('acessorio_id')->nullable()->constrained('acessorios')->onDelete('set null');
+            $table->integer('quantidade')->default(1);
+            $table->decimal('preco_unitario', 10, 2);
+            $table->decimal('valor_total', 10, 2)->nullable(); // <--- Alterado para nullable()
+            $table->timestamps();
+        });
+    }
 
-        $table->foreign('venda_id')->references('id')->on('venda')->onDelete('cascade');
-        $table->foreign('bicicleta_id')->references('id')->on('bicicleta')->onDelete('set null');
-        $table->foreign('acessorio_id')->references('id')->on('acessorios')->onDelete('set null');
-    });
-}
     public function down(): void
     {
         Schema::dropIfExists('item_vendas');

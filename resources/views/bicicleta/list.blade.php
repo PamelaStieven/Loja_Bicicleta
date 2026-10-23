@@ -13,6 +13,7 @@
                 <div class="col-md-3">
                     <label for="tipo" class="form-label">Tipo</label>
                     <select name="tipo" id="tipo" class="form-select">
+                        <option value="foto" {{ request('tipo') == 'foto' ? 'selected' : '' }}>Foto</option>
                         <option value="marca" {{ request('tipo') == 'marca' ? 'selected' : '' }}>Marca</option>
                         <option value="modelo" {{ request('tipo') == 'modelo' ? 'selected' : '' }}>Modelo</option>
                         <option value="cor" {{ request('tipo') == 'cor' ? 'selected' : '' }}>Cor</option>
@@ -40,6 +41,7 @@
             <thead class="table-dark">
                 <tr>
                     <th>ID</th>
+                    <th>Foto</th>
                     <th>Marca</th>
                     <th>Modelo</th>
                     <th>Preço</th>
@@ -53,6 +55,19 @@
                 @forelse($dados as $item)
                     <tr>
                         <td>{{ $item->id }}</td>
+                        <td>
+                            @if($item->foto)
+                                @if(\Illuminate\Support\Str::startsWith($item->foto, ['http://', 'https://']))
+                                    {{-- Se for um link externo (faker/seeder) --}}
+                                    <img src="{{ $item->foto }}" alt="Foto da Bicicleta" class="img-thumbnail" style="max-width: 100px;">
+                                @else
+                                    {{-- Se for um arquivo local de upload --}}
+                                    <img src="{{ asset('storage/' . $item->foto) }}" alt="Foto da Bicicleta" class="img-thumbnail" style="max-width: 100px;">
+                                @endif
+                            @else
+                                <span class="text-muted">Sem foto</span>
+                            @endif
+                        </td>
                         <td>{{ $item->marca }}</td>
                         <td>{{ $item->modelo }}</td>
                         <td>R$ {{ number_format($item->preco, 2, ',', '.') }}</td>

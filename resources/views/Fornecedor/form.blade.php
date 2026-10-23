@@ -27,10 +27,11 @@
 
                 <div class="row g-3">
                     <div class="col-md-6">
-                        <label for="nome_fantasia" class="form-label">nome_fantasia *</label>
-                        <input type="text" name="nome_fantasia" id="nome_fantasia" class="form-control" value="{{ old('nome_fantasia', $dado->nome_fantasia ?? '') }}" required>
+                        <label for="nome" class="form-label">Nome *</label>
+                        <input type="text" name="nome" id="nome" class="form-control" value="{{ old('nome', $dado->nome ?? '') }}" required>
                     </div>
-                     <div class="col-md-3">
+
+                    <div class="col-md-3">
                         <label for="email" class="form-label">Email *</label>
                         <input type="email" name="email" id="email" class="form-control" value="{{ old('email', $dado->email ?? '') }}" required>
                     </div>
@@ -48,8 +49,14 @@
                     <div class="col-md-3">
                         <label for="endereco" class="form-label">Endereço *</label>
                         <input type="text" name="endereco" id="endereco" class="form-control" value="{{ old('endereco', $dado->endereco ?? '') }}" required>
-                    
-                     <div class="col-md-3">
+                    </div><!-- Fechamento da div do endereço corrigido aqui -->
+
+                    <div class="col-md-3">
+                        <label for="cnpj" class="form-label">CNPJ *</label>
+                        <input type="text" name="cnpj" id="cnpj" class="form-control" value="{{ old('cnpj', $dado->cnpj ?? '') }}" placeholder="00.000.000/0000-00" required>
+                    </div>
+                 
+                    <div class="col-md-3">
                         <label for="prazo_entrega" class="form-label">Prazo de Entrega (dias)</label>
                         <input type="number" name="prazo_entrega" id="prazo_entrega" class="form-control" value="{{ old('prazo_entrega', $dado->prazo_entrega ?? '') }}" min="0">
                     </div>
@@ -57,6 +64,25 @@
                     <div class="col-md-3">
                         <label for="valor" class="form-label">Valor (R$)</label>
                         <input type="number" name="valor" id="valor" class="form-control" value="{{ old('valor', $dado->valor ?? '') }}" min="0" step="0.01">
+                    </div>  
+
+                    <div class="col-md-3">
+                        <label for="status" class="form-label">Status</label>
+                        <select name="status" id="status" class="form-select">
+                            <option value="">Selecione um status</option>
+                            <option value="Ativo" {{ old('status', $dado->status ?? '') == 'Ativo' ? 'selected' : '' }}>Ativo</option>
+                            <option value="Inativo" {{ old('status', $dado->status ?? '') == 'Inativo' ? 'selected' : '' }}>Inativo</option>
+                        </select>   
+                    </div>
+
+                    <div class="col-md-3">
+                        <label for="link_site" class="form-label">Link do Site</label>
+                        <input type="url" name="link_site" id="link_site" class="form-control" value="{{ old('link_site', $dado->link_site ?? '') }}" placeholder="https://www.exemplo.com">
+                    </div>
+
+                    <div class="col-md-3">
+                        <label for="redes_sociais" class="form-label">Redes Sociais</label>
+                        <input type="text" name="redes_sociais" id="redes_sociais" class="form-control" value="{{ old('redes_sociais', $dado->redes_sociais ?? '') }}" placeholder="@exemplo">
                     </div>
                 </div>
 

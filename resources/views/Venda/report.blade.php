@@ -1,45 +1,87 @@
 <!DOCTYPE html>
-<html>
-
+<html lang="pt">
 <head>
-    <title>{{$titulo}}</title>
-    <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.3.1/css/bootstrap.min.css"
-        integrity="sha384-ggOyR0iXCbMQv3Xipma34MD+dH/1fQ784/j6cY/iJTQUOhcWr7x9JvoRxT2MZw1T" crossorigin="anonymous">
-
+    <meta charset="UTF-8">
+    <title>{{ $titulo ?? 'Relatório de Vendas' }}</title>
+    <style>
+        body {
+            font-family: DejaVu Sans, sans-serif;
+            font-size: 11px;
+            color: #333;
+            margin: 0;
+            padding: 10px;
+        }
+        h3 {
+            text-align: center;
+            margin-bottom: 5px;
+            font-size: 16px;
+            color: #111;
+        }
+        .date-info {
+            text-align: right;
+            font-size: 10px;
+            margin-bottom: 15px;
+            color: #666;
+        }
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            margin-top: 10px;
+        }
+        th, td {
+            border: 1px solid #bbb;
+            padding: 6px 8px;
+            text-align: left;
+            vertical-align: middle;
+        }
+        th {
+            background-color: #343a40;
+            color: #fff;
+            font-weight: bold;
+            font-size: 11px;
+        }
+        tr:nth-child(even) {
+            background-color: #f9f9f9;
+        }
+        .text-center {
+            text-align: center;
+        }
+        .text-right {
+            text-align: right;
+        }
+    </style>
 </head>
-
 <body>
-    <div class="row">
-        <h3>{{$titulo}}</h3>
 
-    </div>
+    <h3>{{ $titulo ?? 'Relatório de Vendas' }}</h3>
+    <div class="date-info">Emitido em: {{ $date ?? date('d/m/Y') }}</div>
 
-    <div class="row mt-4">
-        <table class="table table-striped table-hover">
-            <thead>
+    <table>
+        <thead>
+            <tr>
+                <th style="width: 5%;">#</th>
+                <th style="width: 35%;">Cliente</th>
+                <th style="width: 30%;">Funcionário</th>
+                <th style="width: 15%;" class="text-center">Data da Venda</th>
+                <th style="width: 15%;" class="text-right">Valor Total</th>
+            </tr>
+        </thead>
+        <tbody>
+            @forelse ($dados as $item)
                 <tr>
-                    <th scope="col">#</th>
-                    <th scope="col">Nome Fantasia</th>
-                    <th scope="col">Produto</th>
-                    <th scope="col">Email</th>
-                    <th scope="col">Telefone</th>
-                    <th scope="col">Endereço</th>
+                    <td>{{ $item->id }}</td>
+                    <td>{{ $item->usuario->nome ?? 'N/A' }}</td>
+                    <td>{{ $item->funcionario->nome ?? 'N/A' }}</td>
+                    <td class="text-center">{{ $item->data_venda ? \Carbon\Carbon::parse($item->data_venda)->format('d/m/Y') : '-' }}</td>
+                    <td class="text-right">R$ {{ number_format($item->valor_total ?? 0, 2, ',', '.') }}</td>
                 </tr>
-            </thead>
-            <tbody>
-                @foreach ($dados as $item)
-                    <tr>
-                        <th scope='row'>{{ $item->id }}</th>
-                        <td>{{ $item->nome_fantasia }}</td>
-                        <td>{{ $item->produto }}</td>
-                        <td>{{ $item->email }}</td>
-                        <td>{{ $item->telefone }}</td>
-                        <td>{{ $item->endereco }}</td>
-                    </tr>
-                @endforeach
-            </tbody>
-        </table>
-    </div>
-</body>
+            @empty
+                <tr>
+                    <td colspan="5" class="text-center">Nenhuma venda encontrada.</td>
+                </tr>
+            @endforelse
+        </tbody>
+    </table>
 
+</body>
 </html>

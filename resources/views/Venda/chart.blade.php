@@ -1,20 +1,20 @@
 @extends('main')
-@section('titulo', 'Relatório de Fornecedores')
+@section('titulo', 'Relatório de vendas')
 
 @section('conteudo')
 <div class="container my-4">
     <div class="d-flex justify-content-between align-items-center mb-4">
-        <h3>Relatório e Gráfico de Fornecedores</h3>
+        <h3>Relatório e Gráfico de Vendas</h3>
         <div>
             <button onclick="window.print()" class="btn btn-secondary">Imprimir / PDF</button>
-            <a href="{{ route('fornecedor.index') }}" class="btn btn-primary">Voltar</a>
+            <a href="{{ route('venda.index') }}" class="btn btn-primary">Voltar</a>
         </div>
     </div>
 
-    <!-- Bloco do Gráfico Larapex -->
+    <!-- Bloco do Gráfico Larapex com altura mínima definida -->
     <div class="card shadow-sm mb-4">
         <div class="card-header bg-dark text-white">Visualização Gráfica</div>
-        <div class="card-body text-center">
+        <div class="card-body text-center" style="min-height: 350px;">
             {!! $chart->container() !!}
         </div>
     </div>
@@ -27,22 +27,22 @@
                 <thead>
                     <tr>
                         <th>ID</th>
-                        <th>Nome Fantasia</th>
-                        <th>Produto</th>
-                        <th>Email</th>
-                        <th>Telefone</th>
-                        <th>Endereço</th>
+                        <th>Usuário</th>
+                        <th>Funcionário</th>
+                        <th>Qtd de Itens</th>
+                        <th>Valor Total</th>
+                        <th>Data</th>
                     </tr>
                 </thead>
                 <tbody>
-                    @foreach($fornecedores as $item)
+                    @foreach($vendas as $item)
                     <tr>
                         <td>{{ $item->id }}</td>
-                        <td>{{ $item->nome_fantasia }}</td>
-                        <td>{{ $item->produto }}</td>
-                        <td>{{ $item->email }}</td>
-                        <td>{{ $item->telefone }}</td>
-                        <td>{{ $item->endereco }}</td>
+                        <td>{{ $item->usuario->nome ?? '-' }}</td>
+                        <td>{{ $item->funcionario->nome ?? '-' }}</td>
+                        <td>{{ $item->itens->sum('quantidade') }}</td>                        
+                        <td>R$ {{ number_format($item->valor_total, 2, ',', '.') }}</td>
+                        <td>{{ $item->data_venda ? \Carbon\Carbon::parse($item->data_venda)->format('d/m/Y') : '-' }}</td>
                     </tr>
                     @endforeach
                 </tbody>
@@ -51,7 +51,7 @@
     </div>
 </div>
 
-<!-- Scripts obrigatórios do Larapex Charts -->
+<!-- Scripts obrigatórios do Larapex Charts carregados diretamente -->
 <script src="{{ $chart->cdn() }}"></script>
 {!! $chart->script() !!}
 @endsection

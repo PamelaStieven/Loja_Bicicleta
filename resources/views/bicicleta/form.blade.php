@@ -19,13 +19,16 @@
                 </div>
             @endif
 
-            <form action="{{ isset($dado->id) ? route('bicicleta.update', $dado->id) : route('bicicleta.store') }}" method="POST">
-                @csrf
+            <form action="{{ route('bicicleta.store') }}" method="POST" enctype="multipart/form-data">                @csrf
                 @if(isset($dado->id))
                     @method('PUT')
                 @endif
 
                 <div class="row g-3">
+                    <div class="mb-3">
+                        <label for="foto" class="form-label">Foto da Bicicleta</label>
+                        <input type="file" name="foto" id="foto" class="form-control" accept="image/*">
+                    </div>
                     <!-- Marca -->
                     <div class="col-md-6">
                         <label for="marca" class="form-label">Marca *</label>

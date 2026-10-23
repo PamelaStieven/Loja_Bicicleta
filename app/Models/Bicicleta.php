@@ -10,12 +10,12 @@ class Bicicleta extends Model
     use HasFactory;
 
     protected $fillable = [
+        'foto',
         'marca',
         'modelo',
         'preco',
         'cor',
         'aro',
         'quantidade',
-        'categoria',
     ];
 }

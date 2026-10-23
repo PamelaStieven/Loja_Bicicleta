@@ -15,9 +15,9 @@
        class="list-group-item list-group-item-action {{ request()->routeIs('venda.*') ? 'active' : '' }}">
         Vendas
     </a>
-     <a href="{{ route('acessoriosseguranca.index') }}" 
-       class="list-group-item list-group-item-action {{ request()->routeIs('acessoriosseguranca.*') ? 'active' : '' }}">
-        Acessórios de Segurança
+     <a href="{{ route('filiais.index') }}" 
+       class="list-group-item list-group-item-action {{ request()->routeIs('filiais.*') ? 'active' : '' }}">
+        Filiais
     </a>
     <a href="{{ route('fornecedor.index') }}" 
        class="list-group-item list-group-item-action {{ request()->routeIs('fornecedor.*') ? 'active' : '' }}">

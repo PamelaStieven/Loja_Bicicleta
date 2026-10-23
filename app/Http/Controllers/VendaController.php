@@ -2,249 +2,186 @@
 
 namespace App\Http\Controllers;
 
-
-use Illuminate\Http\Request;
 use App\Models\Venda;
 use App\Models\ItemVenda;
 use App\Models\Usuario;
 use App\Models\Bicicleta;
 use App\Models\Acessorios;
-use App\Charts\VendaChart;       
-use App\Charts\FornecedorChart;  
+use Illuminate\Http\Request;
+use Illuminate\Support\Facades\DB;
+use Barryvdh\DomPDF\Facade\Pdf;
+use App\Charts\VendaChart;
 
 class VendaController extends Controller
 {
-  
-public function index(Request $request)
-{
-    $query = Venda::with([
-        'usuario',
-        'funcionario',
-        'itens.bicicleta',
-        'itens.acessorio',
-        'bicicleta',
-        'acessorio'
-    ]);
-
-    $tipo = $request->input('tipo');
-    $valor = $request->input('valor');
-
-    if ($tipo && $valor !== null && $valor !== '') {
-        switch ($tipo) {
-            case 'usuario':
-                $query->whereHas('usuario', function ($q) use ($valor) {
-                    $q->where('nome', 'like', "%{$valor}%");
-                });
-                break;
-
-            case 'funcionario':
-                $query->whereHas('funcionario', function ($q) use ($valor) {
-                    $q->where('nome', 'like', "%{$valor}%");
-                });
-                break;
-
-            case 'item':
-                $query->where(function ($q) use ($valor) {
-                    $q->whereHas('itens.bicicleta', function ($b) use ($valor) {
-                        $b->where('modelo', 'like', "%{$valor}%")
-                          ->orWhere('marca', 'like', "%{$valor}%");
-                    })->orWhereHas('itens.acessorio', function ($a) use ($valor) {
-                        $a->where('nome', 'like', "%{$valor}%");
-                    })->orWhereHas('bicicleta', function ($b) use ($valor) {
-                        $b->where('modelo', 'like', "%{$valor}%")
-                          ->orWhere('marca', 'like', "%{$valor}%");
-                    })->orWhereHas('acessorio', function ($a) use ($valor) {
-                        $a->where('nome', 'like', "%{$valor}%");
-                    });
-                });
-                break;
-
-            case 'quantidade':
-                $query->whereHas('itens', function ($q) use ($valor) {
-                    $q->where('quantidade', $valor);
-                })->orWhere('quantidade', $valor);
-                break;
-
-            case 'data':
-                $query->whereDate('data_venda', $valor);
-                break;
-        }
+    public function index()
+    {
+        $dados = Venda::with(['usuario', 'funcionario', 'itens.bicicleta', 'itens.acessorio'])->orderBy('id', 'desc')->get();
+        return view('venda.list', compact('dados'));
     }
 
-    $dados = $query->get();
-
-    return view('venda.list', compact('dados'));
-}
-
-
-   public function create()
+    public function create()
     {
         $usuarios     = Usuario::all();
         $funcionarios = Usuario::all();
-        $bicicletas   = Bicicleta::all();    
-        $acessorios   = Acessorios::all();   
-
+        $bicicletas   = Bicicleta::all();
+        $acessorios   = Acessorios::all();
         return view('venda.form', compact('usuarios', 'funcionarios', 'bicicletas', 'acessorios'));
+    }
+
+    public function validateForm(Request $request)
+    {
+        $request->validate([
+            'usuario_id'     => 'required|exists:usuario,id',
+            'funcionario_id' => 'required|exists:usuario,id',
+            'itens'          => 'required|array|min:1',
+            'itens.*.tipo'   => 'required|in:bicicleta,acessorio',
+            'itens.*.produto_id' => 'required|integer',
+            'itens.*.quantidade' => 'required|integer|min:1',
+            'itens.*.preco'      => 'required|numeric',
+        ], [
+            'usuario_id.required'     => 'O Cliente é obrigatório.',
+            'funcionario_id.required' => 'O Funcionário é obrigatório.',
+            'itens.required'          => 'Adicione pelo menos um item à venda.',
+            'itens.min'               => 'Adicione pelo menos um item à venda.',
+        ]);
+    }
+
+    public function store(Request $request)
+    {
+        $this->validateForm($request);
+
+        DB::transaction(function () use ($request) {
+            $valorTotal = 0;
+
+            $venda = Venda::create([
+                'usuario_id'     => $request->usuario_id,
+                'funcionario_id' => $request->funcionario_id,
+                'data_venda'     => now(),
+                'valor_total'    => 0,
+            ]);
+
+            foreach ($request->itens as $item) {
+                $subtotal = $item['quantidade'] * $item['preco'];
+                $valorTotal += $subtotal;
+
+                ItemVenda::create([
+                    'venda_id'       => $venda->id,
+                    'bicicleta_id'   => $item['tipo'] === 'bicicleta' ? $item['produto_id'] : null,
+                    'acessorio_id'   => $item['tipo'] === 'acessorio' ? $item['produto_id'] : null,
+                    'quantidade'     => $item['quantidade'],
+                    'preco_unitario' => $item['preco'],
+                ]);
+            }
+
+            $venda->update(['valor_total' => $valorTotal]);
+        });
+
+        return redirect()->route('venda.index')->with('success', 'Venda registrada com sucesso!');
     }
 
     public function edit($id)
     {
-        $venda        = Venda::findOrFail($id); 
+        $data         = Venda::with(['itens.bicicleta', 'itens.acessorio'])->findOrFail($id);
         $usuarios     = Usuario::all();
         $funcionarios = Usuario::all();
-        $bicicletas   = Bicicleta::all();    
-        $acessorios   = Acessorios::all();   
-
-        return view('venda.form', compact('venda', 'usuarios', 'funcionarios', 'bicicletas', 'acessorios'));
+        $bicicletas   = Bicicleta::all();
+        $acessorios   = Acessorios::all();
+        return view('venda.form', compact('data', 'usuarios', 'funcionarios', 'bicicletas', 'acessorios'));
     }
 
-  
-public function store(Request $request)
-{
-    $request->validate([
-        'usuario_id' => 'required|exists:usuarios,id',
-        'funcionario_id' => 'required|exists:usuarios,id',
-        'itens' => 'required|array|min:1',
-        'itens.*.tipo' => 'required|in:bicicleta,acessorio',
-        'itens.*.produto_id' => 'required|integer|min:1',
-        'itens.*.quantidade' => 'required|integer|min:1',
-    ]);
+    public function update(Request $request, $id)
+    {
+        $this->validateForm($request);
 
-    \Illuminate\Support\Facades\DB::transaction(function () use ($request) {
-        $valorTotal = 0;
-        $itensCalculados = [];
+        DB::transaction(function () use ($request, $id) {
+            $venda = Venda::findOrFail($id);
+            
+            // Apaga os itens antigos para recriar atualizados
+            ItemVenda::where('venda_id', $venda->id)->delete();
 
-        foreach ($request->input('itens') as $item) {
-            if ($item['tipo'] === 'bicicleta') {
-                $produto = Bicicleta::findOrFail($item['produto_id']);
-            } else {
-                $produto = Acessorios::findOrFail($item['produto_id']);
+            $valorTotal = 0;
+            foreach ($request->itens as $item) {
+                $subtotal = $item['quantidade'] * $item['preco'];
+                $valorTotal += $subtotal;
+
+                ItemVenda::create([
+                    'venda_id'       => $venda->id,
+                    'bicicleta_id'   => $item['tipo'] === 'bicicleta' ? $item['produto_id'] : null,
+                    'acessorio_id'   => $item['tipo'] === 'acessorio' ? $item['produto_id'] : null,
+                    'quantidade'     => $item['quantidade'],
+                    'preco_unitario' => $item['preco'],
+                ]);
             }
 
-            $quantidade = (int) $item['quantidade'];
-            $preco = (float) $produto->preco;
-            $subtotal = round($preco * $quantidade, 2);
+            $venda->update([
+                'usuario_id'     => $request->usuario_id,
+                'funcionario_id' => $request->funcionario_id,
+                'valor_total'    => $valorTotal,
+            ]);
+        });
 
-            $itensCalculados[] = [
-                'bicicleta_id' => $item['tipo'] === 'bicicleta'
-                    ? $produto->id : null,
-                'acessorio_id' => $item['tipo'] === 'acessorio'
-                    ? $produto->id : null,
-                'quantidade' => $quantidade,
-                'valor_total' => $subtotal,
-            ];
-
-            $valorTotal += $subtotal;
-        }
-
-        $venda = Venda::create([
-            'usuario_id' => $request->usuario_id,
-            'funcionario_id' => $request->funcionario_id,
-            'data_venda' => now(),
-            'valor_total' => round($valorTotal, 2),
-        ]);
-
-        foreach ($itensCalculados as $itemCalculado) {
-            $venda->itens()->create($itemCalculado);
-        }
-    });
-
-    return redirect()
-        ->route('venda.index')
-        ->with('success', 'Venda registrada com sucesso!');
-}
-
-
-
-   
-public function update(Request $request, $id)
-{
-    $request->validate([
-        'usuario_id' => 'required|exists:usuarios,id',
-        'funcionario_id' => 'required|exists:usuarios,id',
-        'itens' => 'required|array|min:1',
-        'itens.*.tipo' => 'required|in:bicicleta,acessorio',
-        'itens.*.produto_id' => 'required|integer|min:1',
-        'itens.*.quantidade' => 'required|integer|min:1',
-    ]);
-
-    \Illuminate\Support\Facades\DB::transaction(function () use ($request, $id) {
-        $venda = Venda::findOrFail($id);
-
-        $valorTotal = 0;
-        $itensCalculados = [];
-
-        foreach ($request->input('itens') as $item) {
-            $produto = $item['tipo'] === 'bicicleta'
-                ? Bicicleta::findOrFail($item['produto_id'])
-                : Acessorios::findOrFail($item['produto_id']);
-
-            $quantidade = (int) $item['quantidade'];
-            $subtotal = round((float) $produto->preco * $quantidade, 2);
-
-            $itensCalculados[] = [
-                'bicicleta_id' => $item['tipo'] === 'bicicleta'
-                    ? $produto->id : null,
-                'acessorio_id' => $item['tipo'] === 'acessorio'
-                    ? $produto->id : null,
-                'quantidade' => $quantidade,
-                'valor_total' => $subtotal,
-            ];
-
-            $valorTotal += $subtotal;
-        }
-
-        $venda->update([
-            'usuario_id' => $request->usuario_id,
-            'funcionario_id' => $request->funcionario_id,
-            'data_venda' => $request->data_venda ?? $venda->data_venda,
-            'valor_total' => round($valorTotal, 2),
-        ]);
-
-        $venda->itens()->delete();
-
-        foreach ($itensCalculados as $itemCalculado) {
-            $venda->itens()->create($itemCalculado);
-        }
-    });
-
-    return redirect()
-        ->route('venda.index')
-        ->with('success', 'Venda atualizada com sucesso!');
-}
-
+        return redirect()->route('venda.index')->with('success', 'Venda atualizada com sucesso!');
+    }
 
     public function destroy($id)
     {
-        Venda::destroy($id);
+        DB::transaction(function () use ($id) {
+            ItemVenda::where('venda_id', $id)->delete();
+            Venda::destroy($id);
+        });
 
-        return redirect()->route('venda.index')->with('success', 'Venda removida com sucesso!');
+        return redirect()->route('venda.index')->with('success', 'Registro removido com sucesso!');
     }
-    
-    public function relatorioVendas(VendaChart $chart)
+
+    public function show($id)
     {
-        $vendas = Venda::with(['usuario', 'bicicleta', 'acessorio'])->get();
-        return view('venda.relatorio', ['chart' => $chart->build(), 'vendas' => $vendas]);
+        $venda = Venda::with(['usuario', 'funcionario', 'itens.bicicleta', 'itens.acessorio'])->findOrFail($id);
+        return view('venda.itens', compact('venda'));
     }
 
-    public function relatorioFornecedores(FornecedorChart $chart)
+    public function search(Request $request)
     {
-        $fornecedores = \App\Models\Fornecedor::all();
-        return view('fornecedor.relatorio', ['chart' => $chart->build(), 'fornecedores' => $fornecedores]);
+        $tipo = $request->tipo;
+        $valor = $request->valor;
+
+        $query = Venda::with(['usuario', 'funcionario', 'itens.bicicleta', 'itens.acessorio']);
+
+        if (!empty($valor)) {
+            if ($tipo === 'usuario') {
+                $query->whereHas('usuario', function ($q) use ($valor) {
+                    $q->where('nome', 'like', "%{$valor}%");
+                });
+            } elseif ($tipo === 'funcionario') {
+                $query->whereHas('funcionario', function ($q) use ($valor) {
+                    $q->where('nome', 'like', "%{$valor}%");
+                });
+            }
+        }
+
+        $dados = $query->get();
+        return view('venda.list', compact('dados'));
     }
 
+    public function report()
+    {
+        $vendas = Venda::with(['usuario', 'funcionario', 'itens'])->orderBy('data_venda', 'desc')->get();
+        $data = [
+            'titulo' => 'Relatório Listagem de Vendas',
+            'date'   => date('d/m/Y'),
+            'dados'  => $vendas
+        ];
+        $pdf = Pdf::loadView('venda.report', $data);
+        return $pdf->download('relatorio_vendas.pdf');
+    }
 
-    public function showItens($id)
-{
-    $venda = Venda::with([
-        'usuario',
-        'funcionario',
-        'itens.bicicleta',
-        'itens.acessorio',
-        'bicicleta',
-        'acessorio',
-    ])->findOrFail($id);
+    public function chart(VendaChart $chart)
+    {
+        $vendas = Venda::all();
 
-    return view('venda.itens', compact('venda'));
-}
+        return view('venda.chart', [
+            'chart' => $chart->build(),
+            'vendas' => $vendas
+        ]);
+    }
 }

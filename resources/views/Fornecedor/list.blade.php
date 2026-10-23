@@ -11,13 +11,17 @@
         <div class="col-md-3">
             <label for="tipo" class="form-label">Tipo</label>
             <select name="tipo" id="tipo" class="form-select">
-                <option value="nome_fantasia" {{ request('tipo') == 'nome_fantasia' ? 'selected' : '' }}>Nome Fantasia</option>
+                <option value="nome" {{ request('tipo') == 'nome' ? 'selected' : '' }}>Nome</option>
                 <option value="produto" {{ request('tipo') == 'produto' ? 'selected' : '' }}>Produto</option>
                 <option value="email" {{ request('tipo') == 'email' ? 'selected' : '' }}>EMAIL</option>
                 <option value="telefone" {{ request('tipo') == 'telefone' ? 'selected' : '' }}>Telefone</option>
                 <option value="endereco" {{ request('tipo') == 'endereco' ? 'selected' : '' }}>Endereço</option>
+                <option value="cnpj" {{ request('tipo') == 'cnpj' ? 'selected' : '' }}>CNPJ</option>
                 <option value="prazo_entrega" {{ request('tipo') == 'prazo_entrega' ? 'selected' : '' }}>Prazo de Entrega</option>
                 <option value="valor" {{ request('tipo') == 'valor' ? 'selected' : '' }}>Valor</option>
+                <option value="status" {{ request('tipo') == 'status' ? 'selected' : '' }}>Status</option>
+                <option value="link_site" {{ request('tipo') == 'link_site' ? 'selected' : '' }}>Link do Site</option>
+                <option value="redes_sociais" {{ request('tipo') == 'redes_sociais' ? 'selected' : '' }}>Redes Sociais</option>
             </select>
         </div>
 
@@ -28,10 +32,11 @@
 
         <div class="col-md-5 d-flex gap-2">
             <button type="submit" class="btn btn-primary">Buscar</button>
-            <a href="{{ url('fornecedor/index') }}" class="btn btn-secondary">Limpar</a>
-            <a href="{{ url('fornecedor/create') }}" class="btn btn-success ms-auto">Novo</a>
-            <a href="{{ url('fornecedor/report') }}" class="btn btn-info text-white">Relatório</a>
-           <a href="{{ url('fornecedor/chart') }}" class="btn btn-warning"> Gráfico </a>
+            
+            <a href="{{ route('fornecedor.index') }}" class="btn btn-secondary">Limpar</a>
+            <a href="{{ route('fornecedor.create') }}" class="btn btn-success ms-auto">Novo</a>
+            <a href="{{ route('fornecedor.report') }}" class="btn btn-info text-white">Relatório</a>
+            <a href="{{ route('fornecedor.chart') }}" class="btn btn-warning"> Gráfico </a>
         </div>
     </div>
 </form>
@@ -49,13 +54,18 @@
         <thead class="table-dark">
             <tr>
                 <th>ID</th>
-                <th>Nome Fantasia</th>
+                <th>Nome</th>
                 <th>Produto</th>
                 <th>Email</th>
                 <th>Telefone</th>
                 <th>Endereço</th>
+                <th>CNPJ</th>
                 <th>Prazo de Entrega</th>
                 <th>Valores</th>
+                <th>Status</th>
+                <th>Link do Site</th>
+                <th>Redes Sociais</th>
+                <th class="text-center">Ações</th>
                 <th class="text-center">Ações</th>
             </tr>
         </thead>
@@ -63,13 +73,23 @@
             @forelse($dados as $item)
                 <tr>
                     <td>{{ $item->id }}</td>
-                    <td>{{ $item->nome_fantasia }}</td>
+                    <td>{{ $item->nome }}</td>
                     <td>{{ $item->produto }}</td>
                     <td>{{ $item->email }}</td>
                     <td>{{ $item->telefone }}</td>
                     <td>{{ $item->endereco }}</td>
+                    <td>{{ $item->cnpj }}</td>
                     <td>{{ $item->prazo_entrega }}</td>
                     <td>R$ {{ number_format($item->valor, 2, ',', '.') }}</td>
+                    <td>{{ $item->status }}</td>
+                    <td>
+                        @if($item->link_site)
+                            <a href="{{ $item->link_site }}" target="_blank">{{ $item->link_site }}</a>
+                        @else
+                            -
+                        @endif
+                    </td>   
+                    <td>{{ $item->redes_sociais }}</td>
                     <td class="text-center">
                         <a
                             href="{{ route('fornecedor.edit', $item->id) }}"
@@ -78,6 +98,8 @@
                         >
                             Editar
                         </a>
+                    </td>
+                    <td>
                         <form
                             action="{{ route('fornecedor.destroy', $item->id) }}"
                             method="POST"
@@ -98,7 +120,7 @@
                 </tr>
             @empty
                 <tr>
-                    <td colspan="5" class="text-center">
+                    <td colspan="10" class="text-center">
                         Nenhum fornecedor encontrado.
                     </td>
                 </tr>

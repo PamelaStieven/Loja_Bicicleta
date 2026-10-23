@@ -62,7 +62,7 @@
                         <a class="nav-link" href="{{ route('usuario.index') }}"><i class="bi bi-people"></i> Usuários</a>
                     </li>
                     <li class="nav-item">
-                        <a class="nav-link" href="{{ route('acessoriosSeguranca.index') }}"><i class="bi bi-shield"></i> Acessórios de Segurança</a>
+                        <a class="nav-link" href="{{ route('filiais.index') }}"><i class="bi bi-shield"></i> Filiais</a>
                     </li>
                      <li class="nav-item">
                         <a class="nav-link" href="{{ route('fornecedor.index') }}"><i class="bi bi-truck"></i> Fornecedores</a>
