@@ -1,4 +1,5 @@
- @extends('main')
+
+@extends('main')
 
 @section('titulo', isset($data) && !empty($data->id) ? 'Editar Venda' : 'Registrar Nova Venda')
 
@@ -6,151 +7,44 @@
 
 @php
     $editando = isset($data) && !empty($data->id);
-    $action = $editando ? route('venda.update', $data->id) : route('venda.store');
+    $action = $editando
+        ? route('venda.update', $data->id)
+        : route('venda.store');
 
     $itensVenda = session('itens_venda_temp', []);
     $tipoSelecionado = session('tipo_produto_temp', 'bicicleta');
-    $clienteSelecionado = old('usuario_id', $data->usuario_id ?? session('venda_usuario_id', ''));
-    $funcionarioSelecionado = old('funcionario_id', $data->funcionario_id ?? session('venda_funcionario_id', ''));
+
+    $clienteSelecionado = old(
+        'usuario_id',
+        $data->usuario_id ?? session('venda_usuario_id', '')
+    );
+
+    $funcionarioSelecionado = old(
+        'funcionario_id',
+        $data->funcionario_id ?? session('venda_funcionario_id', '')
+    );
 
     $valorTotalGeral = 0;
 @endphp
 
 <div class="container my-4">
 
-<<<<<<< HEAD
+    {{-- CABEÇALHO --}}
     <div class="d-flex justify-content-between align-items-center mb-4">
-        <h3>{{ $editando ? 'Editar Venda #' . $data->id : 'Registrar Nova Venda' }}</h3>
-        <a href="{{ route('venda.index') }}" class="btn btn-secondary">Voltar</a>
-=======
-            <div class="row mb-3">
-                <div class="col-6">
-                    <label for="usuario_id">Usuário (Cliente)</label>
-                    <select name="usuario_id" class="form-control" required>
-                        <option value="">Selecione o cliente...</option>
-                        @foreach($usuarios ?? [] as $usuario)
-                            <option value="{{ $usuario->id }}" {{ old('usuario_id', $data->usuario_id ?? '') == $usuario->id ? 'selected' : '' }}>
-                                {{ $usuario->nome }}
-                            </option>
-                        @endforeach
-                    </select>
-                </div>
-                <div class="col-6">
-                    <label for="funcionario_id">Funcionário</label>
-                    <select name="funcionario_id" class="form-control" required>
-                        <option value="">Selecione o funcionário...</option>
-                        @foreach($funcionarios ?? [] as $funcionario)
-                            <option value="{{ $funcionario->id }}" {{ old('funcionario_id', $data->funcionario_id ?? '') == $funcionario->id ? 'selected' : '' }}>
-                                {{ $funcionario->nome }}
-                            </option>
-                        @endforeach
-                    </select>
-                </div>
-            </div>
+        <h3>
+            {{ $editando ? 'Editar Venda #' . $data->id : 'Registrar Nova Venda' }}
+        </h3>
 
-            <hr>
-            <h5>Adicionar Produtos</h5>
-            
-            <div class="row g-3 align-items-end mb-3">
-                <div class="col-md-4">
-                    <label class="form-label">Tipo de Produto</label>
-                    <select id="tipo_produto" class="form-control">
-                        <option value="bicicleta">Bicicleta</option>
-                        <option value="acessorio">Acessório</option>
-                    </select>
-                </div>
-                <div class="col-md-4">
-                    <label class="form-label">Selecione o Item</label>
-                    <select id="produto_select" class="form-control">
-                        <option value="">Selecione...</option>
-                        @foreach($bicicletas ?? [] as $bicicleta)
-                            <option value="{{ $bicicleta->id }}" data-tipo="bicicleta" data-nome="{{ $bicicleta->modelo ?? $bicicleta->nome }}" data-preco="{{ $bicicleta->preco ?? 0 }}">
-                                {{ $bicicleta->modelo ?? $bicicleta->nome }} - R$ {{ number_format($bicicleta->preco ?? 0, 2, ',', '.') }}
-                            </option>
-                            //percorre a lista de bicicletas e cria uma opção para cada uma.
-                        @endforeach
-                        @foreach($acessorios ?? [] as $acessorio)
-                            <option value="{{ $acessorio->id }}" data-tipo="acessorio" data-nome="{{ $acessorio->nome }}" data-preco="{{ $acessorio->preco ?? 0 }}" style="display:none;">
-                                {{ $acessorio->nome }} - R$ {{ number_format($acessorio->preco ?? 0, 2, ',', '.') }}
-                            </option>
-                        @endforeach
-                    </select>
-                </div>
-                <div class="col-md-2">
-                    <label class="form-label">Quantidade</label>
-                    <input type="number" id="quantidade_item" class="form-control" value="1" min="1">
-                </div>
-                <div class="col-md-2">
-                    <button type="button" id="btn-adicionar" class="btn btn-success w-100 mt-4">Adicionar</button>
-                </div>
-            </div>
-
-            <table class="table table-bordered mt-3" id="tabela-itens">
-                <thead class="table-light">
-                    <tr>
-                        <th>Produto</th>
-                        <th>Tipo</th>
-                        <th>Qtd</th>
-                        <th>Preço Unitário</th>
-                        <th>Subtotal</th>
-                        <th>Ações</th>
-                    </tr>
-                </thead>
-                <tbody>
-                    {{--Verifica se a venda que está sendo editada já possui itens e, se possuir, percorre cada--}}
-                    @if(isset($data) && $data->itens)
-                        @foreach($data->itens as $index => $detalhe)
-                        {{--Identifica o produto e calcular o subtotal--}}
-                            @php
-                                $prodObj = $detalhe->bicicleta ?? $detalhe->acessorio;
-                                $tipoItem = $detalhe->bicicleta_id ? 'bicicleta' : 'acessorio';
-                                $nomeProd = $prodObj->modelo ?? $prodObj->nome ?? 'Produto';
-                                $precoUnit = $detalhe->preco_unitario ?? $prodObj->preco ?? 0;
-                                $subtotal = $precoUnit * $detalhe->quantidade;
-                            @endphp
-                            {{--Monta uma linha da tabela para cada item que já existe na venda.--}}
-                            <tr>
-                                <td>
-                                    {{ $nomeProd }}
-                                    <input type="hidden" name="itens[{{ $index }}][produto_id]" value="{{ $prodObj->id ?? 0 }}">
-                                    <input type="hidden" name="itens[{{ $index }}][tipo]" value="{{ $tipoItem }}">
-                                </td>
-                                <td class="text-capitalize">{{ $tipoItem }}</td>
-                                <td>
-                                    <input type="number" name="itens[{{ $index }}][quantidade]" value="{{ $detalhe->quantidade }}" class="form-control form-control-sm" readonly>
-                                </td>
-                                <td>
-                                    R$ {{ number_format($precoUnit, 2, ',', '.') }}
-                                    <input type="hidden" name="itens[{{ $index }}][preco]" value="{{ $precoUnit }}">
-                                </td>
-                                <td class="item-subtotal" data-valor="{{ $subtotal }}">R$ {{ number_format($subtotal, 2, ',', '.') }}</td>
-                                <td class="text-center">
-                                    <button type="button" class="btn btn-danger btn-sm btn-remover">Remover</button>
-                                </td>
-                            </tr>
-                        @endforeach
-                    @endif
-                </tbody>
-            </table>
-
-            <div class="row mt-4">
-                <div class="col-md-4 offset-md-8">
-                    <label class="form-label fw-bold">Valor Total (R$) *</label>
-                    <input type="text" name="valor_total" id="valor_total" class="form-control fw-bold fs-5" value="{{ number_format($data->valor_total ?? 0, 2, '.', '') }}" readonly required>
-                </div>
-            </div>
-
-            <div class="mt-3">
-                <button type="submit" class="btn btn-success">Salvar</button>
-                <a href="{{ url('venda') }}" class="btn btn-primary">Voltar</a>
-            </div>
-        </form>
->>>>>>> 03566c60b14d3eaa64eef9880196b724768553e9
+        <a href="{{ route('venda.index') }}" class="btn btn-secondary">
+            Voltar
+        </a>
     </div>
 
+    {{-- MENSAGENS DE ERRO --}}
     @if ($errors->any())
         <div class="alert alert-danger">
             <strong>Verifique os seguintes erros:</strong>
+
             <ul class="mb-0 mt-2">
                 @foreach ($errors->all() as $erro)
                     <li>{{ $erro }}</li>
@@ -168,6 +62,7 @@
 
         {{-- 1. DADOS DA VENDA --}}
         <div class="card shadow-sm mb-4">
+
             <div class="card-header">
                 <h5 class="mb-0">1. Dados da venda</h5>
             </div>
@@ -176,12 +71,15 @@
                 <div class="row g-3">
 
                     <div class="col-md-6">
-                        <label for="usuario_id" class="form-label">Cliente</label>
+                        <label for="usuario_id" class="form-label">
+                            Cliente *
+                        </label>
 
-                        <select name="usuario_id" id="usuario_id" class="form-select" required>
-                            <option value="">Selecione o cliente</option>
+                        <select name="usuario_id" id="usuario_id"
+                                class="form-select" required>
+                            <option value="">Selecione o cliente...</option>
 
-                            @foreach ($usuarios as $usuario)
+                            @foreach ($usuarios ?? [] as $usuario)
                                 <option value="{{ $usuario->id }}"
                                     {{ (string) $clienteSelecionado === (string) $usuario->id ? 'selected' : '' }}>
                                     {{ $usuario->nome }}
@@ -191,12 +89,15 @@
                     </div>
 
                     <div class="col-md-6">
-                        <label for="funcionario_id" class="form-label">Funcionário</label>
+                        <label for="funcionario_id" class="form-label">
+                            Funcionário *
+                        </label>
 
-                        <select name="funcionario_id" id="funcionario_id" class="form-select" required>
-                            <option value="">Selecione o funcionário</option>
+                        <select name="funcionario_id" id="funcionario_id"
+                                class="form-select" required>
+                            <option value="">Selecione o funcionário...</option>
 
-                            @foreach ($funcionarios as $funcionario)
+                            @foreach ($funcionarios ?? [] as $funcionario)
                                 <option value="{{ $funcionario->id }}"
                                     {{ (string) $funcionarioSelecionado === (string) $funcionario->id ? 'selected' : '' }}>
                                     {{ $funcionario->nome }}
@@ -209,16 +110,28 @@
             </div>
         </div>
 
-        {{-- CAMPOS DOS ITENS QUE SERÃO SALVOS --}}
+        {{-- ITENS QUE SERÃO ENVIADOS AO CONTROLLER --}}
         @foreach ($itensVenda as $indice => $item)
-            <input type="hidden" name="itens[{{ $indice }}][produto_id]" value="{{ $item['produto_id'] }}">
-            <input type="hidden" name="itens[{{ $indice }}][tipo]" value="{{ $item['tipo'] }}">
-            <input type="hidden" name="itens[{{ $indice }}][quantidade]" value="{{ $item['quantidade'] }}">
-            <input type="hidden" name="itens[{{ $indice }}][preco]" value="{{ $item['preco'] }}">
+            <input type="hidden"
+                   name="itens[{{ $indice }}][produto_id]"
+                   value="{{ $item['produto_id'] }}">
+
+            <input type="hidden"
+                   name="itens[{{ $indice }}][tipo]"
+                   value="{{ $item['tipo'] }}">
+
+            <input type="hidden"
+                   name="itens[{{ $indice }}][quantidade]"
+                   value="{{ $item['quantidade'] }}">
+
+            <input type="hidden"
+                   name="itens[{{ $indice }}][preco]"
+                   value="{{ $item['preco'] }}">
         @endforeach
 
-        {{-- 2. ADICIONAR BICICLETAS E ACESSÓRIOS --}}
+        {{-- 2. ADICIONAR PRODUTOS --}}
         <div class="card shadow-sm mb-4">
+
             <div class="card-header bg-primary text-white">
                 <h5 class="mb-0">2. Adicionar bicicletas e acessórios</h5>
             </div>
@@ -227,77 +140,92 @@
                 <div class="row g-3 align-items-end">
 
                     <div class="col-md-3">
-                        <label for="tipo_produto_temp" class="form-label">Tipo de produto</label>
+                        <label for="tipo_produto_temp" class="form-label">
+                            Tipo de produto
+                        </label>
 
-                        <select name="tipo_produto_temp" id="tipo_produto_temp" class="form-select" required>
-                            <option value="bicicleta" {{ $tipoSelecionado === 'bicicleta' ? 'selected' : '' }}>
+                        <select name="tipo_produto_temp"
+                                id="tipo_produto_temp"
+                                class="form-select" required>
+
+                            <option value="bicicleta"
+                                {{ $tipoSelecionado === 'bicicleta' ? 'selected' : '' }}>
                                 Bicicleta
                             </option>
-                            <option value="acessorio" {{ $tipoSelecionado === 'acessorio' ? 'selected' : '' }}>
+
+                            <option value="acessorio"
+                                {{ $tipoSelecionado === 'acessorio' ? 'selected' : '' }}>
                                 Acessório
                             </option>
                         </select>
                     </div>
 
-                    <div class="col-md-2">
-                        <button
-                            type="submit"
-                            name="acao"
-                            value="mostrar_produtos"
-                            formaction="{{ route('venda.gerenciar') }}"
-                            formmethod="POST"
-                            formnovalidate
-                            class="btn btn-primary w-100">
-                            Selecionar tipo
-                        </button>
-                    </div>
+                    <div class="col-md-5">
+                        <label for="produto_temp_id" class="form-label">
+                            Produto
+                        </label>
 
-                    <div class="col-md-4">
-                        <label for="produto_temp_id" class="form-label">Produto</label>
+                        <select name="produto_temp_id"
+                                id="produto_temp_id"
+                                class="form-select">
 
-                        <select name="produto_temp_id" id="produto_temp_id" class="form-select">
-                            <option value="">Selecione um produto</option>
+                            <option value="">Selecione um produto...</option>
 
                             @if ($tipoSelecionado === 'bicicleta')
-                                @foreach ($bicicletas as $bicicleta)
+                                @foreach ($bicicletas ?? [] as $bicicleta)
                                     <option value="{{ $bicicleta->id }}">
                                         {{ $bicicleta->modelo ?? $bicicleta->nome }}
-                                        — R$ {{ number_format($bicicleta->preco, 2, ',', '.') }}
+                                        — R$ {{ number_format($bicicleta->preco ?? 0, 2, ',', '.') }}
                                     </option>
                                 @endforeach
                             @else
-                                @foreach ($acessorios as $acessorio)
+                                @foreach ($acessorios ?? [] as $acessorio)
                                     <option value="{{ $acessorio->id }}">
                                         {{ $acessorio->nome }}
-                                        — R$ {{ number_format($acessorio->preco, 2, ',', '.') }}
+                                        — R$ {{ number_format($acessorio->preco ?? 0, 2, ',', '.') }}
                                     </option>
                                 @endforeach
                             @endif
+
                         </select>
                     </div>
 
-                    <div class="col-md-3">
-                        <label for="quantidade_temp" class="form-label">Quantidade</label>
-                        <input
-                            type="number"
-                            name="quantidade_temp"
-                            id="quantidade_temp"
-                            class="form-control"
-                            value="1"
-                            min="1">
+                    <div class="col-md-2">
+                        <label for="quantidade_temp" class="form-label">
+                            Quantidade
+                        </label>
+
+                        <input type="number"
+                               name="quantidade_temp"
+                               id="quantidade_temp"
+                               class="form-control"
+                               value="1"
+                               min="1"
+                               required>
+                    </div>
+
+                    <div class="col-md-2">
+                        <button type="submit"
+                                name="acao"
+                                value="adicionar_item"
+                                formaction="{{ route('venda.gerenciar') }}"
+                                formmethod="POST"
+                                formnovalidate
+                                class="btn btn-success w-100">
+                            <i class="bi bi-plus-circle"></i>
+                            Adicionar
+                        </button>
                     </div>
 
                     <div class="col-12">
-                        <button
-                            type="submit"
-                            name="acao"
-                            value="adicionar_item"
-                            formaction="{{ route('venda.gerenciar') }}"
-                            formmethod="POST"
-                            formnovalidate
-                            class="btn btn-success">
-                            <i class="bi bi-plus-circle"></i>
-                            Adicionar item
+                        <button type="submit"
+                                name="acao"
+                                value="mostrar_produtos"
+                                formaction="{{ route('venda.gerenciar') }}"
+                                formmethod="POST"
+                                formnovalidate
+                                class="btn btn-outline-primary btn-sm">
+                            Atualizar lista de produtos
                         </button>
                     </div>
 
@@ -307,22 +235,27 @@
 
         {{-- 3. ITENS COMPRADOS --}}
         <div class="card shadow-sm mb-4">
+
             <div class="card-header d-flex justify-content-between align-items-center">
                 <h5 class="mb-0">3. Itens comprados</h5>
-                <span class="badge bg-primary">{{ count($itensVenda) }} item(ns)</span>
+
+                <span class="badge bg-primary">
+                    {{ count($itensVenda) }} item(ns)
+                </span>
             </div>
 
             <div class="card-body p-0">
                 <div class="table-responsive">
+
                     <table class="table table-striped table-hover align-middle mb-0">
-                        <thead class="table-dark">
+                        <thead class="table-light">
                             <tr>
                                 <th>Produto</th>
                                 <th>Tipo</th>
                                 <th class="text-center">Quantidade</th>
                                 <th class="text-end">Preço unitário</th>
                                 <th class="text-end">Subtotal</th>
-                                <th class="text-center">Ação</th>
+                                <th class="text-center">Ações</th>
                             </tr>
                         </thead>
 
@@ -339,14 +272,12 @@
                                     <td>{{ $item['nome'] ?? 'Produto' }}</td>
 
                                     <td>
-                                        @if ($item['tipo'] === 'bicicleta')
-                                            <span class="badge bg-info text-dark">Bicicleta</span>
-                                        @else
-                                            <span class="badge bg-warning text-dark">Acessório</span>
-                                        @endif
+                                        {{ $item['tipo'] === 'bicicleta' ? 'Bicicleta' : 'Acessório' }}
                                     </td>
 
-                                    <td class="text-center">{{ $quantidade }}</td>
+                                    <td class="text-center">
+                                        {{ $quantidade }}
+                                    </td>
 
                                     <td class="text-end">
                                         R$ {{ number_format($preco, 2, ',', '.') }}
@@ -357,22 +288,20 @@
                                     </td>
 
                                     <td class="text-center">
-                                        <button
-                                            type="submit"
-                                            name="acao"
-                                            value="remover_{{ $indice }}"
-                                            formaction="{{ route('venda.gerenciar') }}"
-                                            formmethod="POST"
-                                            formnovalidate
-                                            class="btn btn-danger btn-sm">
+                                        <button type="submit"
+                                                name="acao"
+                                                value="remover_{{ $indice }}"
+                                                formaction="{{ route('venda.gerenciar') }}"
+                                                formmethod="POST"
+                                                formnovalidate
+                                                class="btn btn-danger btn-sm">
                                             Remover
                                         </button>
                                     </td>
                                 </tr>
                             @empty
                                 <tr>
-                                    <td colspan="6" class="text-center py-4">
-                                        <i class="bi bi-cart-x fs-3 d-block mb-2"></i>
+                                    <td colspan="6" class="text-center text-muted py-4">
                                         Nenhum produto adicionado à venda.
                                     </td>
                                 </tr>
@@ -384,6 +313,7 @@
                                 <td colspan="4" class="text-end">
                                     <strong>Total da venda:</strong>
                                 </td>
+
                                 <td colspan="2" class="text-end">
                                     <strong class="text-success fs-5">
                                         R$ {{ number_format($valorTotalGeral, 2, ',', '.') }}
@@ -392,41 +322,47 @@
                             </tr>
                         </tfoot>
                     </table>
+
                 </div>
             </div>
         </div>
 
         {{-- 4. FINALIZAR VENDA --}}
         <div class="card shadow-sm mb-4">
+
             <div class="card-header">
                 <h5 class="mb-0">4. Finalizar venda</h5>
             </div>
 
             <div class="card-body">
                 <div class="row align-items-center">
+
                     <div class="col-md-6">
-                        <label class="form-label">Valor total da venda</label>
-                        <input
-                            type="text"
-                            class="form-control form-control-lg fw-bold text-success"
-                            value="R$ {{ number_format($valorTotalGeral, 2, ',', '.') }}"
-                            readonly>
+                        <label class="form-label">
+                            Valor total da venda
+                        </label>
+
+                        <input type="text"
+                               class="form-control form-control-lg fw-bold text-success"
+                               value="R$ {{ number_format($valorTotalGeral, 2, ',', '.') }}"
+                               readonly>
                     </div>
 
                     <div class="col-md-6 d-flex justify-content-md-end gap-2 mt-3 mt-md-0">
-                        <a href="{{ route('venda.index') }}" class="btn btn-secondary">
+                        <a href="{{ route('venda.index') }}"
+                           class="btn btn-secondary">
                             Cancelar
                         </a>
 
-                        <button
-                            type="submit"
-                            formaction="{{ $action }}"
-                            formmethod="POST"
-                            class="btn btn-success"
-                            {{ count($itensVenda) === 0 ? 'disabled' : '' }}>
+                        <button type="submit"
+                                formaction="{{ $action }}"
+                                formmethod="POST"
+                                class="btn btn-success"
+                                {{ count($itensVenda) === 0 ? 'disabled' : '' }}>
                             {{ $editando ? 'Salvar alterações' : 'Registrar venda' }}
                         </button>
                     </div>
+
                 </div>
             </div>
         </div>
