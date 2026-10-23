@@ -4,7 +4,6 @@ namespace App\Http\Controllers;
 
 use Illuminate\Http\Request;
 use App\Models\Acessorios;
-use App\Charts\AcessorioChart; // <--- Importação necessária do gráfico
 
 class AcessoriosController extends Controller
 {

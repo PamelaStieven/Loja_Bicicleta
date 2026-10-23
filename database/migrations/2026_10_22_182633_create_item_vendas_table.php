@@ -15,7 +15,7 @@ return new class extends Migration
             $table->foreignId('acessorio_id')->nullable()->constrained('acessorios')->onDelete('set null');
             $table->integer('quantidade')->default(1);
             $table->decimal('preco_unitario', 10, 2);
-            $table->decimal('valor_total', 10, 2)->nullable(); // <--- Alterado para nullable()
+            $table->decimal('valor_total', 10, 2)->nullable(); 
             $table->timestamps();
         });
     }

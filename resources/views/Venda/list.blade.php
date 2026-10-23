@@ -7,7 +7,6 @@
         <h3>Vendas Registradas</h3>
     </div>
 
-   {{-- Barra de Busca --}}
     <form action="{{ route('venda.search') }}" method="POST" class="d-flex gap-2 my-3">
         @csrf
         <select name="tipo" class="form-select w-auto">
@@ -55,7 +54,6 @@
                     <td>{{ $item->usuario->nome ?? '-' }}</td>
                     <td>{{ $item->funcionario->nome ?? '-' }}</td>
                     
-                    {{-- CORRIGIDO: Soma a quantidade total dos itens da venda --}}
                     <td>{{ $item->itens->sum('quantidade') }}</td>
                     
                     <td>R$ {{ number_format($item->valor_total, 2, ',', '.') }}</td>

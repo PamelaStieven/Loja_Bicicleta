@@ -13,10 +13,8 @@ class VendaSeeder extends Seeder
 {
     public function run(): void
     {
-        // Desativa checagem de chave estrangeira temporariamente
         Schema::disableForeignKeyConstraints();
 
-        // Limpa as tabelas antes de popular
         ItemVenda::truncate();
         Venda::truncate();
 
@@ -24,12 +22,10 @@ class VendaSeeder extends Seeder
             $quantidade = rand(1, 3);
             $bicicletaId = rand(1, 5);
             
-            // Pega o preço real da bicicleta ou define um padrão
             $bicicleta = Bicicleta::find($bicicletaId);
             $precoUnitario = $bicicleta ? ($bicicleta->preco ?? 1500) : 1500;
             $valorTotal = $quantidade * $precoUnitario;
 
-            // 1. Cria a venda principal
             $venda = Venda::create([
                 'usuario_id'     => rand(1, 5),
                 'funcionario_id' => rand(1, 5),
@@ -39,7 +35,6 @@ class VendaSeeder extends Seeder
                 'updated_at'     => now(),
             ]);
 
-            // 2. Cria o item correspondente na tabela 1:N (item_vendas)
             ItemVenda::create([
                 'venda_id'     => $venda->id,
                 'bicicleta_id' => $bicicletaId,
@@ -51,7 +46,6 @@ class VendaSeeder extends Seeder
             ]);
         }
 
-        // Reativa checagem de chave estrangeira
         Schema::enableForeignKeyConstraints();
     }
 }

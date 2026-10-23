@@ -13,7 +13,7 @@ class BicicletaFactory extends Factory
     public function definition(): array
     {
         return [
-            'foto' => $this->faker->imageUrl(640, 480, 'bicycle', true), // Gera uma URL de imagem aleatória
+            'foto' => $this->faker->imageUrl(640, 480, 'bicycle', true), 
             'categoria' => $this->faker->randomElement(['Mountain Bike', 'Cidade', 'Passeio', 'Trilha', 'Ferry']),
             'marca'  => $this->faker->randomElement(['Caloi', 'Oggi', 'Sense', 'Specialized']),
             'modelo' => ucfirst($this->faker->word()),

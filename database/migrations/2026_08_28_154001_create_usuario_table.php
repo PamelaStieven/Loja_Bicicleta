@@ -13,7 +13,7 @@ return new class extends Migration
             $table->string('nome');
             $table->string('email')->nullable();
             $table->string('telefone')->nullable();
-            $table->string('tipo')->default('usuario'); // Coluna 'tipo' necessária
+            $table->string('tipo')->default('usuario');
             $table->string('cpf')->nullable();
             $table->date('data_nascimento')->nullable();
             $table->timestamps();

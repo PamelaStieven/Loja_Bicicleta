@@ -27,15 +27,10 @@ class Fornecedor extends Model
         'redes_sociais',
     ];
 
-    /**
-     * Relacionamento com o Funcionário/Usuário responsável.
-     */
+   
     public function funcionario()
     {
-        // Se a relação for com a model User/Funcionario apontando para a chave funcionario_id:
         return $this->belongsTo(User::class, 'funcionario_id');
 
-        // Se o seu sistema tiver uma model específica Funcionario.php, altere para:
-        // return $this->belongsTo(Funcionario::class, 'funcionario_id');
     }
 }

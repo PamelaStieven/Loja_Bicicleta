@@ -97,7 +97,6 @@ class VendaController extends Controller
         DB::transaction(function () use ($request, $id) {
             $venda = Venda::findOrFail($id);
             
-            // Apaga os itens antigos para recriar atualizados
             ItemVenda::where('venda_id', $venda->id)->delete();
 
             $valorTotal = 0;

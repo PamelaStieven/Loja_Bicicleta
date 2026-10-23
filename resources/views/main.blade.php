@@ -79,19 +79,16 @@
         </div>
     </nav>
 
-    <!-- Conteúdo Principal -->
     <main class="container flex-grow-1">
         @yield('conteudo')
     </main>
 
-    <!-- Footer -->
     <footer class="bg-white border-top py-3 mt-5">
         <div class="container text-center text-muted small">
             &copy; {{ date('Y') }} BikeSystem — Sistema de Gerenciamento de Vendas e Estoque.
         </div>
     </footer>
 
-    <!-- Bootstrap 5 JS Bundle -->
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
 </body>
 </html>

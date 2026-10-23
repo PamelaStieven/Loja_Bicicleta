@@ -11,11 +11,9 @@ return new class extends Migration
         Schema::create('venda', function (Blueprint $table) {
             $table->id();
             
-            // Relacionamentos com a tabela usuario
             $table->foreignId('usuario_id')->constrained('usuario')->onDelete('cascade');
             $table->foreignId('funcionario_id')->constrained('usuario')->onDelete('cascade');
 
-            // Relacionamentos com Bicicleta ou Acessório
             $table->foreignId('bicicleta_id')->nullable()->constrained('bicicletas')->onDelete('set null');
             $table->foreignId('acessorio_id')->nullable()->constrained('acessorios')->onDelete('set null');
 

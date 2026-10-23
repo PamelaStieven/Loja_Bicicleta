@@ -11,7 +11,7 @@ class Acessorios extends Model
 
     protected $table = 'acessorios';
 
-    protected $fillable = [ //autoriza salvamento
+    protected $fillable = [ 
         'nome',
         'marca',
         'preco',

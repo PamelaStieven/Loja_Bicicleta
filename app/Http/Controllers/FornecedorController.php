@@ -11,7 +11,6 @@ class FornecedorController extends Controller
 {
     public function index(Request $request)
     {
-        // Lê os valores vindo de GET ou POST
         $valor = $request->input('valor');
         $tipo  = $request->input('tipo', 'nome');
 
@@ -28,7 +27,6 @@ class FornecedorController extends Controller
 
     public function search(Request $request)
     {
-        // Executa diretamente a busca processando os dados via POST
         return $this->index($request);
     }
 
@@ -47,7 +45,7 @@ class FornecedorController extends Controller
             'email'         => 'required|string|max:255',
             'telefone'      => 'required|string|max:20',
             'endereco'      => 'required|string|max:255',
-            'cnpj'          => 'required|string|max:18|unique:fornecedor,cnpj',
+            'cnpj'          => 'required|string|max:18',
             'prazo_entrega' => 'nullable|integer|min:0',
             'valor'         => 'nullable|numeric|min:0',
             'funcionario_id' => 'nullable|exists:users,id',
