@@ -67,6 +67,9 @@
                      <li class="nav-item">
                         <a class="nav-link" href="{{ route('fornecedor.index') }}"><i class="bi bi-truck"></i> Fornecedores</a>
                     </li>
+                     <li class="nav-item">
+                        <a class="nav-link" href="{{ route('estoque.index') }}"><i class="bi bi-box"></i> Estoque</a>
+                    </li>
                 </ul>
                 <div class="d-flex align-items-center gap-3">
                     <span class="text-light small"><i class="bi bi-person-circle"></i> Operador</span>

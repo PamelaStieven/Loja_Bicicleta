@@ -15,6 +15,7 @@ class DatabaseSeeder extends Seeder
             VendaSeeder::class,
             FiliaisSeeder::class,
             FornecedorSeeder::class,
+            EstoqueSeeder::class,
         ]);
 
 

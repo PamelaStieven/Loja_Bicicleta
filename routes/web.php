@@ -7,6 +7,7 @@ use App\Http\Controllers\AcessoriosController;
 use App\Http\Controllers\VendaController;
 use App\Http\Controllers\FiliaisController;
 use App\Http\Controllers\FornecedorController;
+use App\Http\Controllers\EstoqueController;
 
 Route::get('/', function () {
     return redirect()->route('login');
@@ -35,6 +36,7 @@ Route::get('/fornecedor/chart', [FornecedorController::class, 'chart'])->name('f
 Route::get('/venda/report', [VendaController::class, 'report'])->name('venda.report');
 Route::get('/venda/chart', [VendaController::class, 'chart'])->name('venda.chart');
 Route::get('/venda/{id}/itens', [VendaController::class, 'show'])->name('venda.itens');
+Route::get('/estoque/chart', [EstoqueController::class, 'chart'])->name('estoque.chart');
 
 // Rotas de Pesquisa
 Route::post('usuario/search', [UsuarioController::class, 'search'])->name('usuario.search');
@@ -43,7 +45,7 @@ Route::post('acessorios/search', [AcessoriosController::class, 'search'])->name(
 Route::post('venda/search', [VendaController::class, 'search'])->name('venda.search');
 Route::post('filiais/search', [FiliaisController::class, 'search'])->name('filiais.search');
 Route::post('fornecedor/search', [FornecedorController::class, 'search'])->name('fornecedor.search');
-
+Route ::post('estoque/search', [EstoqueController::class, 'search'])->name('estoque.search');
 
 // Resources (Devem ficar abaixo das rotas customizadas)
 Route::resource('usuario', UsuarioController::class)->names('usuario');
@@ -52,3 +54,4 @@ Route::resource('acessorios', AcessoriosController::class)->names('acessorios');
 Route::resource('venda', VendaController::class)->names('venda');
 Route::resource('filiais', FiliaisController::class)->names('filiais');
 Route::resource('fornecedor', FornecedorController::class)->names('fornecedor');
+Route::resource('estoque', EstoqueController::class)->names('estoque');

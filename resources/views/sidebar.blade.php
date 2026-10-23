@@ -23,4 +23,8 @@
        class="list-group-item list-group-item-action {{ request()->routeIs('fornecedor.*') ? 'active' : '' }}">
         Fornecedores
     </a>
+    <a href="{{ route('estoque.index') }}" 
+       class="list-group-item list-group-item-action {{ request()->routeIs('estoque.*') ? 'active' : '' }}">
+        Estoque
+    </a>
 </div>
