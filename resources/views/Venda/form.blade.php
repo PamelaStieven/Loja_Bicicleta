@@ -18,12 +18,11 @@
 
 <div class="container my-4">
 
-<<<<<<< HEAD
     <div class="d-flex justify-content-between align-items-center mb-4">
         <h3>{{ $editando ? 'Editar Venda #' . $data->id : 'Registrar Nova Venda' }}</h3>
         <a href="{{ route('venda.index') }}" class="btn btn-secondary">Voltar</a>
-=======
             <div class="row mb-3">
+
                 <div class="col-6">
                     <label for="usuario_id">Usuário (Cliente)</label>
                     <select name="usuario_id" class="form-control" required>
@@ -145,7 +144,6 @@
                 <a href="{{ url('venda') }}" class="btn btn-primary">Voltar</a>
             </div>
         </form>
->>>>>>> 03566c60b14d3eaa64eef9880196b724768553e9
     </div>
 
     @if ($errors->any())
