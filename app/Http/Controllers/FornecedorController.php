@@ -61,7 +61,6 @@ class FornecedorController extends Controller
             'telefone.required'     => 'O telefone é obrigatório.',
             'endereco.required'     => 'O endereço é obrigatório.',
             'cnpj.required'         => 'O CNPJ é obrigatório.',
-            'cnpj.unique'           => 'O CNPJ informado já está cadastrado.',
             'prazo_entrega.integer' => 'O prazo de entrega deve ser um número inteiro.',
             'valor.numeric'         => 'O valor deve ser um número.',
             'funcionario_id.exists' => 'O funcionário selecionado não existe.',
