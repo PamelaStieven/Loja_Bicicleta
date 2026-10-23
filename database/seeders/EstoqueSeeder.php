@@ -8,9 +8,7 @@ use App\Models\Estoque;
 
 class EstoqueSeeder extends Seeder
 {
-    /**
-     * Run the database seeds.
-     */
+
     public function run(): void
     {
     
