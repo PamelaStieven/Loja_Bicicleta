@@ -20,33 +20,152 @@ class VendaController extends Controller
         return view('venda.list', compact('dados'));
     }
 
-    public function create()
-    {
-        $usuarios     = Usuario::all();
-        $funcionarios = Usuario::all();
-        $bicicletas   = Bicicleta::all();
-        $acessorios   = Acessorios::all();
-        return view('venda.form', compact('usuarios', 'funcionarios', 'bicicletas', 'acessorios'));
+  
+public function create()
+{
+    $usuarios = Usuario::where('tipo', 'cliente')->get();
+
+    $funcionarios = Usuario::where('tipo', 'funcionario')->get();
+
+    $bicicletas = Bicicleta::all();
+    $acessorios = Acessorios::all();
+
+    return view('venda.form', compact(
+        'usuarios',
+        'funcionarios',
+        'bicicletas',
+        'acessorios'
+    ));
+}
+
+public function gerenciarItem(Request $request)
+{
+    $acao = $request->input('acao');
+
+    // Guarda cliente e funcionário antes de atualizar os produtos.
+    if ($request->has('usuario_id')) {
+        session(['venda_usuario_id' => $request->input('usuario_id')]);
     }
 
-    public function validateForm(Request $request)
-    {
-        $request->validate([
-            'usuario_id'     => 'required|exists:usuario,id',
-            'funcionario_id' => 'required|exists:usuario,id',
-            'itens'          => 'required|array|min:1',
-            'itens.*.tipo'   => 'required|in:bicicleta,acessorio',
-            'itens.*.produto_id' => 'required|integer',
-            'itens.*.quantidade' => 'required|integer|min:1',
-            'itens.*.preco'      => 'required|numeric',
-        ], [
-            'usuario_id.required'     => 'O Cliente é obrigatório.',
-            'funcionario_id.required' => 'O Funcionário é obrigatório.',
-            'itens.required'          => 'Adicione pelo menos um item à venda.',
-            'itens.min'               => 'Adicione pelo menos um item à venda.',
+    if ($request->has('funcionario_id')) {
+        session(['venda_funcionario_id' => $request->input('funcionario_id')]);
+    }
+
+    $tipo = $request->input(
+        'tipo_produto_temp',
+        session('tipo_produto_temp', 'bicicleta')
+    );
+
+    if (!in_array($tipo, ['bicicleta', 'acessorio'], true)) {
+        return redirect()->back()
+            ->withErrors([
+                'tipo_produto_temp' => 'Tipo de produto inválido.'
+            ]);
+    }
+
+    session(['tipo_produto_temp' => $tipo]);
+
+    // Apenas troca o tipo de produto exibido.
+    if ($acao === 'mostrar_produtos') {
+        return redirect()->back();
+    }
+
+    // Adiciona bicicleta ou acessório à venda temporária.
+    if ($acao === 'adicionar_item') {
+        $dados = $request->validate([
+            'produto_temp_id' => 'required|integer|min:1',
+            'quantidade_temp' => 'required|integer|min:1',
         ]);
+
+        if ($tipo === 'bicicleta') {
+            $produto = Bicicleta::findOrFail(
+                $dados['produto_temp_id']
+            );
+
+            $nome = $produto->modelo
+                ?? $produto->nome
+                ?? 'Bicicleta';
+        } else {
+            $produto = Acessorios::findOrFail(
+                $dados['produto_temp_id']
+            );
+
+            $nome = $produto->nome ?? 'Acessório';
+        }
+
+        $itens = session('itens_venda_temp', []);
+
+        $produtoId = (int) $produto->id;
+        $quantidade = (int) $dados['quantidade_temp'];
+        $preco = (float) $produto->preco;
+        $encontrado = false;
+
+        foreach ($itens as &$item) {
+            if (
+                $item['tipo'] === $tipo &&
+                (int) $item['produto_id'] === $produtoId
+            ) {
+                $item['quantidade'] += $quantidade;
+                $item['preco'] = $preco;
+
+                $encontrado = true;
+                break;
+            }
+        }
+
+        unset($item);
+
+        if (!$encontrado) {
+            $itens[] = [
+                'tipo' => $tipo,
+                'produto_id' => $produtoId,
+                'nome' => $nome,
+                'preco' => $preco,
+                'quantidade' => $quantidade,
+            ];
+        }
+
+        session(['itens_venda_temp' => array_values($itens)]);
     }
 
+    // Remove um produto da lista temporária.
+    if (
+        is_string($acao) &&
+        preg_match('/^remover_(\d+)$/', $acao, $matches)
+    ) {
+        $indice = (int) $matches[1];
+
+        $itens = session('itens_venda_temp', []);
+
+        if (isset($itens[$indice])) {
+            unset($itens[$indice]);
+
+            session([
+                'itens_venda_temp' => array_values($itens)
+            ]);
+        }
+    }
+
+    return redirect()->back();
+}
+public function validateForm(Request $request)
+{
+    $request->validate([
+        'usuario_id' => 'required|exists:usuario,id',
+        'funcionario_id' => 'required|exists:usuario,id',
+
+        'itens' => 'required|array|min:1',
+        'itens.*.tipo' => 'required|in:bicicleta,acessorio',
+        'itens.*.produto_id' => 'required|integer',
+        'itens.*.quantidade' => 'required|integer|min:1',
+        'itens.*.preco' => 'required|numeric|min:0',
+    ], [
+        'usuario_id.required' => 'Selecione um cliente.',
+        'funcionario_id.required' => 'Selecione um funcionário.',
+        'itens.required' => 'Adicione pelo menos um item à venda.',
+        'itens.min' => 'Adicione pelo menos um item à venda.',
+    ]);
+}
     public function store(Request $request)
     {
         $this->validateForm($request);
@@ -77,14 +196,31 @@ class VendaController extends Controller
             $venda->update(['valor_total' => $valorTotal]);
         });
 
+        session()->forget('itens_venda_temp');
         return redirect()->route('venda.index')->with('success', 'Venda registrada com sucesso!');
     }
 
     public function edit($id)
     {
-        $data         = Venda::with(['itens.bicicleta', 'itens.acessorio'])->findOrFail($id);
-        $usuarios     = Usuario::all();
-        $funcionarios = Usuario::all();
+        $data = Venda::with(['itens.bicicleta', 'itens.acessorio'])->findOrFail($id);
+        
+        // Carrega os itens salvos do banco para a sessão para edição sem JS
+        $itensAtuais = [];
+        foreach($data->itens as $detalhe) {
+            $prodObj = $detalhe->bicicleta ?? $detalhe->acessorio;
+            $tipoItem = $detalhe->bicicleta_id ? 'bicicleta' : 'acessorio';
+            $itensAtuais[] = [
+                'tipo' => $tipoItem,
+                'produto_id' => $prodObj->id ?? 0,
+                'nome' => $prodObj->modelo ?? $prodObj->nome ?? 'Produto',
+                'preco' => $detalhe->preco_unitario ?? $prodObj->preco ?? 0,
+                'quantidade' => $detalhe->quantidade,
+            ];
+        }
+        session()->put('itens_venda_temp', $itensAtuais);
+
+        $usuarios = Usuario::where('tipo', 'cliente')->get();
+        $funcionarios = Usuario::where('tipo', 'funcionario')->get();
         $bicicletas   = Bicicleta::all();
         $acessorios   = Acessorios::all();
         return view('venda.form', compact('data', 'usuarios', 'funcionarios', 'bicicletas', 'acessorios'));
@@ -96,7 +232,6 @@ class VendaController extends Controller
 
         DB::transaction(function () use ($request, $id) {
             $venda = Venda::findOrFail($id);
-            
             ItemVenda::where('venda_id', $venda->id)->delete();
 
             $valorTotal = 0;
@@ -120,6 +255,7 @@ class VendaController extends Controller
             ]);
         });
 
+        session()->forget('itens_venda_temp');
         return redirect()->route('venda.index')->with('success', 'Venda atualizada com sucesso!');
     }
 

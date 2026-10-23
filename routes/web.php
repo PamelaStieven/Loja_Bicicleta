@@ -46,7 +46,7 @@ Route::post('venda/search', [VendaController::class, 'search'])->name('venda.sea
 Route::post('filiais/search', [FiliaisController::class, 'search'])->name('filiais.search');
 Route::post('fornecedor/search', [FornecedorController::class, 'search'])->name('fornecedor.search');
 Route ::post('estoque/search', [EstoqueController::class, 'search'])->name('estoque.search');
-
+Route::post('/venda/gerenciar', [VendaController::class,'gerenciarItem'])->name('venda.gerenciar');
 
 Route::resource('usuario', UsuarioController::class)->names('usuario');
 Route::resource('bicicleta', BicicletaController::class);
