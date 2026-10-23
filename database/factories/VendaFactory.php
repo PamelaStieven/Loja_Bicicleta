@@ -5,7 +5,7 @@ namespace Database\Factories;
 use Illuminate\Database\Eloquent\Factories\Factory;
 use App\Models\Usuario;
 use App\Models\Bicicleta;
-use App\Models\Acessorios; // Ou Acessorio, conforme o nome no seu projeto
+use App\Models\Acessorios; 
 
 class VendaFactory extends Factory
 {

@@ -9,7 +9,6 @@ class UsuarioController extends Controller
 {
     public function index(Request $request)
     {
-        // Lê os valores vindo de GET ou POST
         $valor = $request->input('valor');
         $tipo  = $request->input('tipo', 'nome');
 
@@ -26,7 +25,6 @@ class UsuarioController extends Controller
 
     public function search(Request $request)
     {
-        // Executa diretamente a busca processando os dados via POST
         return $this->index($request);
     }
 

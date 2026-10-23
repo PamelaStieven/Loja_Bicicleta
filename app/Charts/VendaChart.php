@@ -24,15 +24,12 @@ class VendaChart
         $valores = [];
 
         foreach ($vendas as $item) {
-            // Calcula o total de itens da venda (soma as quantidades dos itens ou conta os registros)
             $totalQtd = $item->itens->sum('quantidade') > 0 
                 ? $item->itens->sum('quantidade') 
                 : $item->itens->count();
 
-            // Pega o nome do cliente ou usa o ID da venda como fallback
             $nomeCliente = $item->usuario->nome ?? $item->usuario->name ?? "Venda #{$item->id}";
 
-            // Formata a label: "Nome do Cliente (X itens)"
             $labels[] = "{$nomeCliente} ({$totalQtd} " . ($totalQtd == 1 ? 'item' : 'itens') . ")";
 
             $valores[] = (float) $item->valor_total;

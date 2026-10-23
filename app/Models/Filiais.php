@@ -9,9 +9,9 @@ class Filiais extends Model
 {
     use HasFactory;
 
-    protected $table = 'filiais'; // Nome da tabela no banco de dados
+    protected $table = 'filiais'; 
 
-    protected $fillable = [ //autoriza salvamento
+    protected $fillable = [ 
         'nome',
         'cnpj',
         'cidade',

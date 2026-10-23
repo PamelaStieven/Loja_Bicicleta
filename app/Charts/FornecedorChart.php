@@ -38,8 +38,8 @@ class FornecedorChart
         return $this->chart->lineChart()
             ->setTitle('Relatório de Fornecedores')
             ->setSubtitle('Valores e Prazos de Entrega por Fornecedor')
-            ->addData($valores, 'Valor (R$)')              // Array primeiro, Nome depois
-            ->addData($prazo_entrega, 'Prazo de Entrega') // Array primeiro, Nome depois
+            ->addData($valores, 'Valor (R$)')              
+            ->addData($prazo_entrega, 'Prazo de Entrega') 
             ->setXAxis($nomes);
     }
 }

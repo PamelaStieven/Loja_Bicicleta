@@ -8,7 +8,6 @@
     <div class="row mb-3">
         <h3>Listagem de Bicicletas</h3>
 
-        <!-- Formulário de Pesquisa -->
         <form action="{{ route('bicicleta.search') }}" method="POST">
             @csrf
 
@@ -70,7 +69,6 @@
                         <tr>
                             <td>{{ $item->id }}</td>
 
-                            <!-- Foto da bicicleta -->
                             <td style="min-width: 120px;">
                                 @php
                                     $foto = trim($item->foto ?? '');
@@ -125,7 +123,6 @@
                             <td>{{ $item->aro ?? '-' }}</td>
                             <td>{{ $item->quantidade ?? '-' }}</td>
 
-                            <!-- Editar -->
                             <td class="text-center" style="width: 80px;">
                                 <a
                                     href="{{ route('bicicleta.edit', $item->id) }}"
@@ -136,7 +133,6 @@
                                 </a>
                             </td>
 
-                            <!-- Excluir -->
                             <td class="text-center" style="width: 80px;">
                                 <form
                                     action="{{ route('bicicleta.destroy', $item->id) }}"
