@@ -45,9 +45,13 @@ Route::post('acessorios/search', [AcessoriosController::class, 'search'])->name(
 Route::post('venda/search', [VendaController::class, 'search'])->name('venda.search');
 Route::post('filiais/search', [FiliaisController::class, 'search'])->name('filiais.search');
 Route::post('fornecedor/search', [FornecedorController::class, 'search'])->name('fornecedor.search');
+<<<<<<< HEAD
 Route ::post('estoque/search', [EstoqueController::class, 'search'])->name('estoque.search');
 
 // Resources (Devem ficar abaixo das rotas customizadas)
+=======
+
+>>>>>>> 98bb1a253a4cfe008c8fb34de6fa1cfcbb1aee75
 
 Route::resource('usuario', UsuarioController::class)->names('usuario');
 Route::resource('bicicleta', BicicletaController::class);

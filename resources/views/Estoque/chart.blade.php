@@ -11,7 +11,7 @@
         </div>
     </div>
 
-    <!-- Bloco do Gráfico Larapex com altura mínima definida -->
+
     <div class="card shadow-sm mb-4">
         <div class="card-header bg-dark text-white">Visualização Gráfica de Quantidade em Estoque</div>
         <div class="card-body text-center" style="min-height: 350px;">
@@ -19,7 +19,7 @@
         </div>
     </div>
 
-    <!-- Tabela de Dados Detalhados -->
+
     <div class="card shadow-sm">
         <div class="card-header bg-primary text-white">Tabela de Dados</div>
         <div class="card-body">
