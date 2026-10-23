@@ -7,7 +7,6 @@ use App\Http\Controllers\AcessoriosController;
 use App\Http\Controllers\VendaController;
 use App\Http\Controllers\FiliaisController;
 use App\Http\Controllers\FornecedorController;
-use App\Http\Controllers\CategoriaController;
 
 Route::get('/', function () {
     return redirect()->route('login');
@@ -44,13 +43,12 @@ Route::post('acessorios/search', [AcessoriosController::class, 'search'])->name(
 Route::post('venda/search', [VendaController::class, 'search'])->name('venda.search');
 Route::post('filiais/search', [FiliaisController::class, 'search'])->name('filiais.search');
 Route::post('fornecedor/search', [FornecedorController::class, 'search'])->name('fornecedor.search');
-Route::post('categoria/search', [CategoriaController::class, 'search'])->name('categoria.search');
+
 
 // Resources (Devem ficar abaixo das rotas customizadas)
 Route::resource('usuario', UsuarioController::class)->names('usuario');
-Route::resource('bicicleta', BicicletaController::class)->names('bicicleta');
+Route::resource('bicicleta', BicicletaController::class);
 Route::resource('acessorios', AcessoriosController::class)->names('acessorios');
 Route::resource('venda', VendaController::class)->names('venda');
 Route::resource('filiais', FiliaisController::class)->names('filiais');
 Route::resource('fornecedor', FornecedorController::class)->names('fornecedor');
-Route::resource('categoria', CategoriaController::class)->names('categoria');

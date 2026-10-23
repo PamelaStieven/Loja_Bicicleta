@@ -1,11 +1,11 @@
 @extends('main')
-@section('titulo', isset($dado->id) ? 'Editar Bicicleta' : 'Nova Bicicleta')
+@section('titulo', isset($bicicleta->id) ? 'Editar Bicicleta' : 'Nova Bicicleta')
 
 @section('conteudo')
 <div class="container my-4">
     <div class="card shadow-sm">
         <div class="card-header bg-primary text-white">
-            <h4 class="mb-0">{{ isset($dado->id) ? 'Editar Bicicleta' : 'Nova Bicicleta' }}</h4>
+            <h4 class="mb-0">{{ isset($bicicleta->id) ? 'Editar Bicicleta' : 'Nova Bicicleta' }}</h4>
         </div>
         <div class="card-body">
 
@@ -19,50 +19,59 @@
                 </div>
             @endif
 
-            <form action="{{ route('bicicleta.store') }}" method="POST" enctype="multipart/form-data">                @csrf
-                @if(isset($dado->id))
+            <form action="{{ !empty($bicicleta->id) ? route('bicicleta.update', $bicicleta->id) : route('bicicleta.store') }}" method="POST" enctype="multipart/form-data">
+                @csrf
+                @if(!empty($bicicleta->id))
                     @method('PUT')
                 @endif
 
                 <div class="row g-3">
+                    <!-- Foto -->
                     <div class="mb-3">
                         <label for="foto" class="form-label">Foto da Bicicleta</label>
                         <input type="file" name="foto" id="foto" class="form-control" accept="image/*">
                     </div>
+
+                    <!-- Categoria (Texto Simples) -->
+                    <div class="col-md-6">
+                        <label for="categoria" class="form-label">Categoria</label>
+                        <input type="text" name="categoria" id="categoria" class="form-control" value="{{ old('categoria', $bicicleta->categoria ?? '') }}" placeholder="Ex: Mountain Bike, Urbana, Speed">
+                    </div>
+
                     <!-- Marca -->
                     <div class="col-md-6">
                         <label for="marca" class="form-label">Marca *</label>
-                        <input type="text" name="marca" id="marca" class="form-control" value="{{ old('marca', $dado->marca ?? '') }}" required>
+                        <input type="text" name="marca" id="marca" class="form-control" value="{{ old('marca', $bicicleta->marca ?? '') }}" required>
                     </div>
 
                     <!-- Modelo -->
                     <div class="col-md-6">
                         <label for="modelo" class="form-label">Modelo *</label>
-                        <input type="text" name="modelo" id="modelo" class="form-control" value="{{ old('modelo', $dado->modelo ?? '') }}" required>
+                        <input type="text" name="modelo" id="modelo" class="form-control" value="{{ old('modelo', $bicicleta->modelo ?? '') }}" required>
                     </div>
 
                     <!-- Preço -->
                     <div class="col-md-4">
                         <label for="preco" class="form-label">Preço (R$) *</label>
-                        <input type="number" step="0.01" name="preco" id="preco" class="form-control" value="{{ old('preco', $dado->preco ?? '') }}" required>
+                        <input type="number" step="0.01" name="preco" id="preco" class="form-control" value="{{ old('preco', $bicicleta->preco ?? '') }}" required>
                     </div>
 
                     <!-- Cor -->
                     <div class="col-md-4">
                         <label for="cor" class="form-label">Cor</label>
-                        <input type="text" name="cor" id="cor" class="form-control" value="{{ old('cor', $dado->cor ?? '') }}">
+                        <input type="text" name="cor" id="cor" class="form-control" value="{{ old('cor', $bicicleta->cor ?? '') }}">
                     </div>
 
                     <!-- Aro -->
                     <div class="col-md-2">
                         <label for="aro" class="form-label">Aro</label>
-                        <input type="number" name="aro" id="aro" class="form-control" value="{{ old('aro', $dado->aro ?? '') }}">
+                        <input type="number" name="aro" id="aro" class="form-control" value="{{ old('aro', $bicicleta->aro ?? '') }}">
                     </div>
 
                     <!-- Quantidade -->
                     <div class="col-md-2">
                         <label for="quantidade" class="form-label">Quantidade</label>
-                        <input type="number" name="quantidade" id="quantidade" class="form-control" value="{{ old('quantidade', $dado->quantidade ?? '') }}">
+                        <input type="number" name="quantidade" id="quantidade" class="form-control" value="{{ old('quantidade', $bicicleta->quantidade ?? '') }}">
                     </div>
                 </div>
 

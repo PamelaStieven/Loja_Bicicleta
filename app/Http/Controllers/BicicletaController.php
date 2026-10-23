@@ -23,81 +23,74 @@ class BicicletaController extends Controller
 
     public function search(Request $request)
     {
-        // Redireciona os parâmetros POST/GET diretamente para o index
         return $this->index($request);
     }
 
     public function create()
     {
-        $dado = new Bicicleta();
-        return view('bicicleta.form', compact('dado'));
+        $bicicleta = new Bicicleta();
+        return view('bicicleta.form', compact('bicicleta'));
     }
 
     private function validateForm(Request $request)
     {
         $request->validate([
-            'foto'       => 'nullable|image|mimes:jpeg,png,jpg,gif|max:2048',
+            'foto'       => 'nullable|image|mimes:jpeg,png,jpg,gif|max:50048',
+            'categoria'  => 'nullable|string|max:255',
             'marca'      => 'required|string|max:255',
             'modelo'     => 'required|string|max:255',
             'preco'      => 'required|numeric',
-            'cor'        => 'required|string|max:255',
-            'aro'        => 'required|integer',
-            'quantidade' => 'required|integer',
+            'cor'        => 'nullable|string|max:255',
+            'aro'        => 'nullable|integer',
+            'quantidade' => 'nullable|integer',
         ], [
-            'foto.image'        => 'O arquivo deve ser uma imagem.',
-            'foto.mimes'        => 'A imagem deve ser do tipo: jpeg, png, jpg, gif.',
+            'foto.image'          => 'O arquivo deve ser uma imagem.',
+            'foto.mimes'          => 'A imagem deve ser do tipo: jpeg, png, jpg, gif.',
+            'categoria.required' => 'O campo categoria é obrigatório.',
             'marca.required'      => 'O campo marca é obrigatório.',
             'modelo.required'     => 'O campo modelo é obrigatório.',
             'preco.required'      => 'O campo preço é obrigatório.',
-            'cor.required'        => 'O campo cor é obrigatório.',
-            'aro.required'        => 'O campo aro é obrigatório.',
             'quantidade.required' => 'O campo quantidade é obrigatório.',
         ]);
     }
 
-   public function store(Request $request)
-{
-    $this->validateForm($request);
+    public function store(Request $request)
+    {
+        $this->validateForm($request);
 
-    $dados = $request->all();
+        $dados = $request->all();
 
-    // Verifica se foi enviada uma imagem válida
-   if ($request->hasFile('foto') && $request->file('foto')->isValid()) {
-    // Grava na pasta storage/app/public/bicicletas
-    $dados['foto'] = $request->file('foto')->store('bicicletas', 'public');
-}
-
-    Bicicleta::create($dados);
-
-    return redirect()->route('bicicleta.index')->with('success', 'Registro salvo com sucesso!');
-}
-
-public function update(Request $request, $id)
-{
-    $this->validateForm($request);
-
-    $bicicleta = Bicicleta::findOrFail($id);
-    $dados = $request->all();
-
-    if ($request->hasFile('foto') && $request->file('foto')->isValid()) {
-        // Opcional: deletar a foto antiga se existir
         if ($request->hasFile('foto') && $request->file('foto')->isValid()) {
-        // Grava na pasta storage/app/public/bicicletas
-        $dados['foto'] = $request->file('foto')->store('bicicletas', 'public');
-}
-        
-        $dados['foto'] = $request->file('foto')->store('bicicletas', 'public');
+            $dados['foto'] = $request->file('foto')->store('bicicletas', 'public');
+        }
+
+        Bicicleta::create($dados);
+
+        return redirect()->route('bicicleta.index')->with('success', 'Bicicleta salva com sucesso!');
     }
 
-    $bicicleta->update($dados);
+    public function update(Request $request, $id)
+    {
+        $this->validateForm($request);
 
-    return redirect()->route('bicicleta.index')->with('success', 'Registro atualizado com sucesso!');
-}
+        $bicicleta = Bicicleta::findOrFail($id);
+        $dados = $request->all();
+
+        if ($request->hasFile('foto') && $request->file('foto')->isValid()) {
+            $dados['foto'] = $request->file('foto')->store('bicicletas', 'public');
+        } else {
+            unset($dados['foto']);
+        }
+
+        $bicicleta->update($dados);
+
+        return redirect()->route('bicicleta.index')->with('success', 'Registro atualizado com sucesso!');
+    }
 
     public function edit($id)
     {
-        $dado = Bicicleta::findOrFail($id);
-        return view('bicicleta.form', compact('dado'));
+        $bicicleta = Bicicleta::findOrFail($id);
+        return view('bicicleta.form', compact('bicicleta'));
     }
 
     public function destroy($id)

@@ -11,6 +11,7 @@ class Bicicleta extends Model
 
     protected $fillable = [
         'foto',
+        'categoria',
         'marca',
         'modelo',
         'preco',
