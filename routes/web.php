@@ -9,25 +9,14 @@ use App\Http\Controllers\FiliaisController;
 use App\Http\Controllers\FornecedorController;
 use App\Http\Controllers\EstoqueController;
 
-Route::get('/', function () {
-    return redirect()->route('login');
-});
+Route::get('/', function () {return redirect()->route('login');});
+Route::get('/login', function () {return view('auth.login');})->name('login');
 
-Route::get('/login', function () {
-    return view('auth.login');
-})->name('login');
+Route::post('/login', function () {return redirect()->route('bicicleta.index');})->name('login.post');
 
-Route::post('/login', function () {
-    return redirect()->route('bicicleta.index');
-})->name('login.post');
+Route::get('/register', function () {return view('auth.register');})->name('register');
 
-Route::get('/register', function () {
-    return view('auth.register');
-})->name('register');
-
-Route::post('/register', function () {
-    return redirect()->route('login')->with('success', 'Cadastro realizado com sucesso! Faça login.');
-})->name('register.post');
+Route::post('/register', function () {return redirect()->route('login')->with('success', 'Cadastro realizado com sucesso! Faça login.');})->name('register.post');
 
 // Rotas de Relatórios e Gráficos
 Route::get('/fornecedor/report', [FornecedorController::class, 'report'])->name('fornecedor.report');
@@ -46,7 +35,7 @@ Route::post('venda/search', [VendaController::class, 'search'])->name('venda.sea
 Route::post('filiais/search', [FiliaisController::class, 'search'])->name('filiais.search');
 Route::post('fornecedor/search', [FornecedorController::class, 'search'])->name('fornecedor.search');
 Route ::post('estoque/search', [EstoqueController::class, 'search'])->name('estoque.search');
-Route::post('/venda/gerenciar', [VendaController::class,'gerenciarItem'])->name('venda.gerenciar');
+Route::post('venda/gerenciar', [VendaController::class, 'gerenciarItem'])->name('venda.gerenciar');
 
 Route::resource('usuario', UsuarioController::class)->names('usuario');
 Route::resource('bicicleta', BicicletaController::class);
