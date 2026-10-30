@@ -305,7 +305,6 @@
             </div>
         </div>
 
-        {{-- FINALIZAR VENDA --}}
         <div class="card shadow-sm mb-4">
             <div class="card-header">
                 <h5 class="mb-0">4. Finalizar venda</h5>
