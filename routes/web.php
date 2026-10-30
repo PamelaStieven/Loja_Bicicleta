@@ -12,10 +12,6 @@ use App\Http\Controllers\FornecedorController;
 use App\Http\Controllers\EstoqueController;
 
 
-// ============================================================
-// AUTENTICAÇÃO
-// ============================================================
-
 Route::get('/', function () {return redirect()->route('login');});
 Route::get('/login', function () {return view('auth.login');})->name('login');
 Route::post('/login', function () {return redirect()->route('bicicleta.index');})->name('login.post');
@@ -33,43 +29,38 @@ Route::prefix('venda')->name('venda.')->group(function () {
     Route::post('/search', [VendaController::class,'search'])->name('search');
     Route::post('/gerenciar', [VendaController::class,'gerenciarItem'])->name('gerenciar');
 
-    // Relatório de vendas
+
     Route::get('/report', [
         VendaController::class,
         'report'
     ])->name('report');
 
-    // Gráfico de vendas
     Route::get('/chart', [
         VendaController::class,
         'chart'
     ])->name('chart');
 
-    // Visualizar os itens de uma venda
     Route::get('/{id}/itens', [
         VendaController::class,
         'show'
     ])->name('itens');
 
-    // Formulário para editar uma venda
     Route::get('/{id}/edit', [
         VendaController::class,
         'edit'
     ])->name('edit');
 
-    // Atualizar uma venda existente
     Route::put('/{id}', [
         VendaController::class,
         'update'
     ])->name('update');
 
-    // Excluir uma venda inteira
+
     Route::delete('/{id}', [
         VendaController::class,
         'destroy'
     ])->name('destroy');
 
-    // Visualizar uma venda
     Route::get('/{id}', [
         VendaController::class,
         'show'

@@ -115,231 +115,226 @@ class VendaController extends Controller
         ));
     }
 
-  
-    public function gerenciarItem(Request $request)
-    {
-        //informa o que o usuário deseja fazer. 
-        $acao = $request->input('acao');
+public function gerenciarItem(Request $request)
 
-        // descobre o que esta sendo editado
-        $vendaId = $request->input(
-            'venda_id',
-            session('venda_editando_id')
-        );
+{
+    // Informa o que o usuário deseja fazer.
+    $acao = $request->input('acao');
 
-        // Verificando se existe esse id venda.
-        if (!empty($vendaId)) {
-            $vendaExistente = Venda::findOrFail($vendaId);
+    // Descobre qual venda está sendo editada.
+    $vendaId = $request->input(
+        'venda_id',
+        session('venda_editando_id')
+    );
 
-            session([
-                'venda_editando_id' => $vendaExistente->id,
-                'venda_modo' => 'editar',
-            ]);
+    // Verifica se existe uma venda informada.
+    if (!empty($vendaId)) {
+        $vendaExistente = Venda::findOrFail($vendaId);
 
-            // Recupera o cliente
-            if (
-                !$request->filled('usuario_id')
-                && 
-                !session('venda_usuario_id')
-            ) {
-                session([
-                    'venda_usuario_id' => $vendaExistente->usuario_id,
-                ]);
-            }
-
-            // Recupera o funcionário 
-            if (
-                !$request->filled('funcionario_id')
-                && 
-                !session('venda_funcionario_id')
-            ) {
-                session([
-                    'venda_funcionario_id' => $vendaExistente->funcionario_id,
-                ]);
-            }
-        }
-
-        // Verifica o modo atual da venda.
-        $modoAtual = session('venda_modo');
-
-        // !in_array :verifica se o valor existe dentro de uma lista
-        if (!in_array($modoAtual, ['nova', 'editar'], true)) {
-            return redirect()
-                ->route('venda.create')
-                ->withErrors([
-                    'venda' => 'A sessão da venda expirou. Inicie novamente.',
-                ]);
-        }
-
-        // Atualiza o cliente selecionado na sessão, guarda ID.
-        if ($request->filled('usuario_id')) {
-            session([
-                'venda_usuario_id' => $request->input('usuario_id'),
-            ]);
-        }
-
-        // Atualiza o funcionário selecionado na sessão.
-        if ($request->filled('funcionario_id')) {
-            session([
-                'venda_funcionario_id' => $request->input('funcionario_id'),
-            ]);
-        }
-
-        // Obtém o tipo de produto selecionado.
-        $tipo = $request->input(
-            'tipo_produto_temp',
-            session('tipo_produto_temp', 'bicicleta')
-        );
-
-        // Aceita somente bicicletas ou acessórios.
-        if (!in_array($tipo, ['bicicleta', 'acessorio'], true)) {
-            return redirect()
-                ->back()
-                ->withErrors([
-                    'tipo_produto_temp' => 'Tipo de produto inválido.',
-                ]);
-        }
-
-        // Salva o tipo de produto selecionado na sessão
         session([
-            'tipo_produto_temp' => $tipo,
+            'venda_editando_id' => $vendaExistente->id,
+            'venda_modo' => 'editar',
         ]);
 
-        // Recupera os itens temporários da venda ja add
-        $itens = session('itens_venda_temp', []);
-
-        // Define para qual tela o usuário deve retornar edit ou create
-        $redirecionar = function () {
-            if (
-                session('venda_modo') === 'editar'
-                && session('venda_editando_id')
-            ) {
-                return redirect()->route(
-                    'venda.edit',
-                    session('venda_editando_id')
-                );
-            }
-
-            return redirect()->route('venda.create');
-        };
-
-        // Ação para mostrar os produtos disponíveis
-        if ($acao === 'mostrar_produtos') {
-            return $redirecionar();
-        }
-
-        // Ação para adicionar um produto à venda
-        if ($acao === 'adicionar_item') {
-
-            
-            $dados = $request->validate([
-                'produto_temp_id' => 'required|integer|min:1',
-                'quantidade_temp' => 'required|integer|min:1',
-            ], [
-                'produto_temp_id.required' => 'Selecione um produto.',
-                'quantidade_temp.required' => 'Informe a quantidade.',
-                'quantidade_temp.min' => 'A quantidade deve ser maior que zero.',
-            ]);
-
-            // verifica se o produto selecionado é uma bicicleta ou um acessório
-            if ($tipo === 'bicicleta') {
-                $produto = Bicicleta::findOrFail(
-                    $dados['produto_temp_id']
-                );
-
-                $nome = $produto->modelo
-                    ?? $produto->nome
-                    ?? 'Bicicleta';
-
-            } else {
-                $produto = Acessorios::findOrFail(
-                    $dados['produto_temp_id']
-                );
-
-                $nome = $produto->nome ?? 'Acessório';
-            }
-
-            // Obtém os dados do produto.
-            $produtoId = (int) $produto->id;
-            $quantidade = (int) $dados['quantidade_temp'];
-            $preco = (float) $produto->preco;
-
-            // Verifica se o produto já está na lista.
-            $encontrado = false;
-
-            // Percorre os itens temporários da venda para verificar se o produto já existe
-            // Se já existir, atualiza a quantidade e o preço sem duplicar o item
-            foreach ($itens as &$item) {
-                if (
-                    $item['tipo'] === $tipo
-                    && (int) $item['produto_id'] === $produtoId
-                ) {
-                    // Se já existe, aumenta a quantidade.
-                    $item['quantidade'] += $quantidade;
-
-                    // Atualiza o preço e o nome do produto.
-                    $item['preco'] = $preco;
-                    $item['nome'] = $nome;
-
-                    $encontrado = true;
-
-                    break;
-                }
-            }
-
-            // encerra a referência utilizada &item.
-            unset($item);
-
-            // Se o produto ainda não existe na lista, adiciona um novo item
-            if (!$encontrado) {
-                $itens[] = [
-                    'tipo' => $tipo,
-                    'produto_id' => $produtoId,
-                    'nome' => $nome,
-                    'preco' => $preco,
-                    'quantidade' => $quantidade,
-                ];
-            }
-
-            session([
-                'itens_venda_temp' => array_values($itens),
-            ]);
-
-            return $redirecionar();
-        }
-
-        // Ação para remover um item da venda.
+        // Recupera o cliente.
         if (
-            is_string($acao) 
-            && preg_match('/^remover_(\d+)$/', $acao, $matches) //verifica se um texto corresponde a '/^remover_(\d+)$/'
+            !$request->filled('usuario_id')
+            && !session('venda_usuario_id')
         ) {
-            // Obtém o índice do item que será removido.
-            $indice = (int) $matches[1];
-
-            // Verifica 
-            if (array_key_exists($indice, $itens)) {
-
-                // Remove
-                unset($itens[$indice]);
-
-                // Reorganiza
-                $itens = array_values($itens);
-
-                // Salva
-                session([
-                    'itens_venda_temp' => $itens,
-                ]);
-            }
-
-            return $redirecionar();
+            session([
+                'venda_usuario_id' => $vendaExistente->usuario_id,
+            ]);
         }
 
+        // Recupera o funcionário.
+        if (
+            !$request->filled('funcionario_id')
+            && !session('venda_funcionario_id')
+        ) {
+            session([
+                'venda_funcionario_id' => $vendaExistente->funcionario_id,
+            ]);
+        }
+    }
+
+    // Verifica o modo atual da venda.
+    $modoAtual = session('venda_modo');
+
+    if (!in_array($modoAtual, ['nova', 'editar'], true)) {
+        return redirect()
+            ->route('venda.create')
+            ->withErrors([
+                'venda' => 'A sessão da venda expirou. Inicie novamente.',
+            ]);
+    }
+
+    // Atualiza o cliente selecionado na sessão.
+    if ($request->filled('usuario_id')) {
+        session([
+            'venda_usuario_id' => $request->input('usuario_id'),
+        ]);
+    }
+
+    // Atualiza o funcionário selecionado na sessão.
+    if ($request->filled('funcionario_id')) {
+        session([
+            'venda_funcionario_id' => $request->input('funcionario_id'),
+        ]);
+    }
+
+    // Obtém o tipo de produto selecionado.
+    $tipo = $request->input(
+        'tipo_produto_temp',
+        session('tipo_produto_temp', 'bicicleta')
+    );
+
+    // Aceita somente bicicletas ou acessórios.
+    if (!in_array($tipo, ['bicicleta', 'acessorio'], true)) {
         return redirect()
             ->back()
             ->withErrors([
-                'venda' => 'Ação não reconhecida.',
+                'tipo_produto_temp' => 'Tipo de produto inválido.',
             ]);
     }
+
+    // Salva o tipo de produto selecionado na sessão.
+    session([
+        'tipo_produto_temp' => $tipo,
+    ]);
+
+    // Recupera os itens temporários da venda.
+    $itens = session('itens_venda_temp', []);
+
+    // Define para qual tela o usuário deve retornar.
+    $redirecionar = function () {
+        if (
+            session('venda_modo') === 'editar'
+            && session('venda_editando_id')
+        ) {
+            return redirect()->route(
+                'venda.edit',
+                session('venda_editando_id')
+            );
+        }
+
+        return redirect()->route('venda.create');
+    };
+
+    // Ação para mostrar os produtos disponíveis.
+    if ($acao === 'mostrar_produtos') {
+        return $redirecionar();
+    }
+
+    // Ação para adicionar um produto à venda.
+    if ($acao === 'adicionar_item') {
+        $dados = $request->validate([
+            'produto_temp_id' => 'required|integer|min:1',
+            'quantidade_temp' => 'required|integer|min:1',
+        ], [
+            'produto_temp_id.required' => 'Selecione um produto.',
+            'quantidade_temp.required' => 'Informe a quantidade.',
+            'quantidade_temp.min' => 'A quantidade deve ser maior que zero.',
+        ]);
+
+        // Verifica se o produto é uma bicicleta ou um acessório.
+        if ($tipo === 'bicicleta') {
+            $produto = Bicicleta::findOrFail(
+                $dados['produto_temp_id']
+            );
+
+            $nome = $produto->modelo
+                ?? $produto->nome
+                ?? 'Bicicleta';
+        } else {
+            $produto = Acessorios::findOrFail(
+                $dados['produto_temp_id']
+            );
+
+            $nome = $produto->nome ?? 'Acessório';
+        }
+
+        // Obtém os dados do produto.
+        $produtoId = (int) $produto->id;
+        $quantidade = (int) $dados['quantidade_temp'];
+        $preco = (float) $produto->preco;
+
+        // Verifica se o produto já está na lista.
+        $encontrado = false;
+
+        foreach ($itens as &$item) {
+            if (
+                $item['tipo'] === $tipo
+                && (int) $item['produto_id'] === $produtoId
+            ) {
+                // Se já existe, aumenta a quantidade.
+                $item['quantidade'] += $quantidade;
+
+                // Atualiza o preço e o nome.
+                $item['preco'] = $preco;
+                $item['nome'] = $nome;
+
+                $encontrado = true;
+                break;
+            }
+        }
+
+        // Encerra a referência utilizada no foreach.
+        unset($item);
+
+        // Adiciona o produto se ele ainda não existe na lista.
+        if (!$encontrado) {
+            $itens[] = [
+                'tipo' => $tipo,
+                'produto_id' => $produtoId,
+                'nome' => $nome,
+                'preco' => $preco,
+                'quantidade' => $quantidade,
+            ];
+        }
+
+        // Salva os itens atualizados na sessão.
+        session([
+            'itens_venda_temp' => array_values($itens),
+        ]);
+
+        return $redirecionar();
+    }
+
+
+if (
+    is_string($acao)
+    && preg_match('/^remover_(\d+)$/', $acao, $matches)
+) {
+    // Obtém o índice do item que será removido.
+    $indice = (int) $matches[1];
+
+    // Verifica se o índice existe na lista.
+    if (array_key_exists($indice, $itens)) {
+
+        // Remove o item.
+        unset($itens[$indice]);
+
+        // Reorganiza os índices.
+        $itens = array_values($itens);
+
+        // Salva a lista atualizada na sessão.
+        session([
+            'itens_venda_temp' => $itens,
+        ]);
+    }
+
+    // Retorna para a tela da venda.
+    return $redirecionar();
+}
+
+
+    // Se nenhuma ação corresponder às opções disponíveis.
+    return redirect()
+        ->back()
+        ->withErrors([
+            'venda' => 'Ação não reconhecida.',
+        ]);
+}
 
 
     private function validateForm(Request $request)
