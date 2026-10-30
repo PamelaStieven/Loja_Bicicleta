@@ -37,7 +37,7 @@ class FornecedorController extends Controller
         return view('fornecedor.form', compact('dado'));
     }
 
-    // 1. Adicionado '$id = null' para aceitar o ID opcionalmente
+    
     private function validateForm(Request $request, $id = null)
     {
         $request->validate([
@@ -89,10 +89,10 @@ class FornecedorController extends Controller
         return view('fornecedor.form', compact('dado'));
     }
 
-    // 3. Adicionado '$id' na assinatura da função update
+  
     public function update(Request $request, $id)
     {
-        $this->validateForm($request, $id); // 4. Passado o $id para o validateForm
+        $this->validateForm($request, $id); 
 
         $fornecedor = Fornecedor::findOrFail($id);
         $fornecedor->update($request->all());

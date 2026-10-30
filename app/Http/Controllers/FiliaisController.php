@@ -3,7 +3,7 @@
 namespace App\Http\Controllers;
 
 use Illuminate\Http\Request;
-use Illuminate\Validation\Rule; // <-- IMPORTANTE: Adicione esta linha no topo
+use Illuminate\Validation\Rule; 
 use App\Models\Filiais;
 
 class FiliaisController extends Controller
@@ -28,8 +28,6 @@ class FiliaisController extends Controller
 
     private function validateForm(Request $request, $id = null)
     {
-        // Opcional: Se quiser reutilizar o validateForm para store e update, 
-        // podes passar o $id para aplicar o ignore no CNPJ também aqui.
         $request->validate([
             'nome'      => 'required',
             'cnpj'      => [

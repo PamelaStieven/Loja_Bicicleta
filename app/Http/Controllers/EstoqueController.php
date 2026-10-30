@@ -42,7 +42,7 @@ class EstoqueController extends Controller
         ]);
     }
 
-    public function store(Request $request)
+    public function store(Request $request)//validar dados, cria e redireciona
     {
         $this->validateForm($request);
 
@@ -90,14 +90,14 @@ class EstoqueController extends Controller
             ->route('estoque.index')
             ->with('success', 'Produto removido do estoque com sucesso!');
     }
-
-    public function show($id)
+    //buscar registo especifico
+    public function show($id) 
     {
         $estoque = Estoque::findOrFail($id);
 
         return view('Estoque.show', compact('estoque'));
     }
-
+    //filtrar e buscar registros
     public function search(Request $request)
     {
         $tipo = $request->input('tipo');
