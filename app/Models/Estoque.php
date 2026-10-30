@@ -9,7 +9,7 @@ use App\Models\Bicicleta;
 class Estoque extends Model
 {
     use HasFactory;
-
+    //permite preenchimento
     protected $fillable = [
         'produto',
         'quantidade',
