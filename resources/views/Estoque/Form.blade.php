@@ -23,7 +23,7 @@
                     </ul>
                 </div>
             @endif
-            //escolhendo a rota de acordo com a ação (cadastro ou edição)
+            {{--escolhendo a rota de acordo com a ação (cadastro ou edição)--}}
             @php
                 $action = isset($estoque) && $estoque->exists
                     ? route('estoque.update', $estoque->id)

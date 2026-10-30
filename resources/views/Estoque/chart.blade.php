@@ -14,7 +14,7 @@
 
     <div class="card shadow-sm mb-4">
         <div class="card-header bg-dark text-white">Visualização Gráfica de Quantidade em Estoque</div>
-        <div class="card-body text-center" style="min-height: 350px;"> //HTML
+        <div class="card-body text-center" style="min-height: 350px;"> {{--HTML--}}
             {!! $chart->container() !!} 
         </div>
     </div>
