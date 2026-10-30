@@ -6,8 +6,8 @@
 <div class="container my-4">
     <div class="card shadow-sm">
         <div class="card-header bg-primary text-white">
+             {{--verifica se o estoque existe e se é uma edição ou cadastro--}}
             <h4 class="mb-0">
-                //verifica se o estoque existe e se é uma edição ou cadastro
                 {{ isset($estoque) && $estoque->exists ? 'Editar Produto do Estoque' : 'Cadastro de Estoque' }}
             </h4>
         </div>

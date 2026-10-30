@@ -40,7 +40,7 @@ class EstoqueController extends Controller
             'preco.min' => 'O preço não pode ser negativo.',
         ]);
     }
-    public function store(Request $request)
+    public function store(Request $request) 
     {
         $this->validateForm($request);
 
@@ -96,7 +96,7 @@ class EstoqueController extends Controller
         return view('Estoque.show', compact('estoque'));
     }
 
-    // Buscar registros por produto, quantidade ou preço
+    // Buscar/pesquisa registros por produto, quantidade ou preço
     public function search(Request $request)
     {
         $request->validate([

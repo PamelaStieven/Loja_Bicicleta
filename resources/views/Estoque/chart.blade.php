@@ -14,8 +14,8 @@
 
     <div class="card shadow-sm mb-4">
         <div class="card-header bg-dark text-white">Visualização Gráfica de Quantidade em Estoque</div>
-        <div class="card-body text-center" style="min-height: 350px;">
-            {!! $chart->container() !!} //HTML
+        <div class="card-body text-center" style="min-height: 350px;"> //HTML
+            {!! $chart->container() !!} 
         </div>
     </div>
 
@@ -49,7 +49,7 @@
     </div>
 </div>
 
-//Scripts obrigatórios do Larapex Charts carregados diretamente
+
 <script src="{{ $chart->cdn() }}"></script>
 {!! $chart->script() !!}
 @endsection
