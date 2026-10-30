@@ -53,14 +53,13 @@
 
         </select>
 
-        <input
-            type="text"
-            name="valor"
-            class="form-control"
-            placeholder="Digite para pesquisar..."
-            value="{{ request('valor') }}"
-        >
-
+       <input
+    type="{{ request('tipo') === 'data' ? 'date' : 'text' }}"
+    name="valor"
+    class="form-control"
+    placeholder="Digite para pesquisar..."
+    value="{{ request('valor') }}"
+>
         <button type="submit" class="btn btn-primary">
             Buscar
         </button>
@@ -94,8 +93,6 @@
         </a>
 
     </form>
-
-    {{-- MENSAGEM DE SUCESSO --}}
     @if (session('success'))
 
         <div class="alert alert-success alert-dismissible fade show">
@@ -112,7 +109,7 @@
 
     @endif
 
-    {{-- MENSAGENS DE ERRO --}}
+   
     @if ($errors->any())
 
         <div class="alert alert-danger">
@@ -131,7 +128,7 @@
 
     @endif
 
-    {{-- TABELA DE VENDAS --}}
+    {{--TABELA DE VENDAS --}}
     <div class="table-responsive">
 
         <table class="table table-striped table-hover shadow-sm">
@@ -197,7 +194,7 @@
 
                         </td>
 
-                        {{-- VISUALIZAR ITENS --}}
+                       
                         <td class="text-center">
 
                             <a
