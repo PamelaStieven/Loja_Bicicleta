@@ -100,6 +100,7 @@
         </div>
 
         {{-- ITENS DA VENDA ENVIADOS AO CONTROLLER --}}
+        {{-- Percorre todos os itens ja add da venda --}}
         @foreach ($itensVenda as $indice => $item)
             <input type="hidden"
                    name="itens[{{ $indice }}][produto_id]"
