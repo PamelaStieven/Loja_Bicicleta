@@ -14,6 +14,8 @@
     $itensVenda = session('itens_venda_temp', []);
     $tipoSelecionado = session('tipo_produto_temp', 'bicicleta');
 
+    //recupera od dados
+
     $clienteSelecionado = old('usuario_id',
         $data->usuario_id ?? session('venda_usuario_id', '')
     );
@@ -27,7 +29,7 @@
 @endphp
 
 <div class="container py-4">
-    //verifica se é edição ou cadastro por true e false
+    {{-- verifica se é edição ou cadastro por true e false --}}
     <div class="d-flex flex-wrap justify-content-between align-items-center gap-3 mb-4">
         <h3 class="mb-0">
             {{ $editando ? 'Editar Venda #' . $data->id : 'Registrar Nova Venda' }}
@@ -48,14 +50,13 @@
             </ul>
         </div>
     @endif
-    
+
     <form id="vendaForm" action="{{ $action }}" method="POST">
         @csrf
 
         @if ($editando)
             @method('PUT')
         @endif
-
 
         <div class="card shadow-sm mb-4">
             <div class="card-header">
@@ -100,7 +101,7 @@
         </div>
 
         {{-- ITENS DA VENDA ENVIADOS AO CONTROLLER --}}
-        {{-- Percorre todos os itens ja add da venda --}}
+        {{-- Percorre todos os itens ja add da venda e organiza em formato de lista --}}
         @foreach ($itensVenda as $indice => $item)
             <input type="hidden"
                    name="itens[{{ $indice }}][produto_id]"
@@ -119,7 +120,6 @@
                    value="{{ $item['preco'] }}">
         @endforeach
 
-        {{-- ADICIONAR PRODUTOS --}}
         <div class="card shadow-sm mb-4">
             <div class="card-header bg-primary text-white">
                 <h5 class="mb-0">2. Adicionar bicicletas e acessórios</h5>
@@ -186,6 +186,7 @@
                                required>
                     </div>
 
+                    {{--selecionar bicicletas--}}
                     <div class="col-12 col-md-2">
                         <button type="submit"
                                 name="acao"
@@ -328,7 +329,7 @@
 
                             <button type="submit"
                                     formaction="{{ $action }}"
-                                    formmethod="{{ $editando ? 'POST' : 'POST' }}"
+                                    formmethod="POST"
                                     class="btn btn-success"
                                     {{ count($itensVenda) === 0 ? 'disabled' : '' }}>
                                 {{ $editando ? 'Salvar alterações' : 'Registrar venda' }}
