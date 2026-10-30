@@ -13,7 +13,7 @@ return new class extends Migration
             $table->string('nome');
             $table->string('email')->nullable();
             $table->string('telefone')->nullable();
-            $table->string('tipo')->default('usuario');
+            $table->string('tipo')->default('cliente');
             $table->string('cpf')->nullable();
             $table->date('data_nascimento')->nullable();
             $table->timestamps();
@@ -22,6 +22,6 @@ return new class extends Migration
 
     public function down(): void
     {
-        Schema::dropIfExists('usuario');
+        Schema::dropIfExists('cliente');
     }
 };

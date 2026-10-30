@@ -30,7 +30,7 @@ class Usuario extends Model
     // Verifica se o usuário é cliente
     public function isCliente()
     {
-        return $this->tipo === 'cliente';
+        return $this->tipo === 'usuario';
     }
 
     // Verifica se o usuário é funcionário

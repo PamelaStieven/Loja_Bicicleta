@@ -7,14 +7,14 @@ use App\Models\ItemVenda;
 use App\Models\Usuario;
 use App\Models\Bicicleta;
 use App\Models\Acessorios;
+use App\Charts\VendaChart;
+use Barryvdh\DomPDF\Facade\Pdf;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
-use Barryvdh\DomPDF\Facade\Pdf;
-use App\Charts\VendaChart;
 
 class VendaController extends Controller
 {
-    public function index()
+    public function index(Request $request)
     {
         session()->forget([
             'itens_venda_temp',
@@ -25,22 +25,67 @@ class VendaController extends Controller
             'venda_modo'
         ]);
 
-        $dados = Venda::with([
-            'usuario',
-            'funcionario',
-            'itens.bicicleta',
-            'itens.acessorio'
-        ])
-        ->orderBy('id', 'desc')
-        ->get();
+        $valor = $request->input('valor');
+        $tipo  = $request->input('tipo', 'usuario');
 
-        return view('venda.list', compact('dados'));
+        $query = Venda::with(['usuario', 'funcionario', 'itens.bicicleta', 'itens.acessorio']);
+
+        if (!empty($valor)) {
+            switch ($tipo) {
+                case 'usuario':
+                    $query->whereHas('usuario', function ($q) use ($valor) {
+                        $q->where('nome', 'like', '%' . $valor . '%');
+                    });
+                    break;
+
+                case 'funcionario':
+                    $query->whereHas('funcionario', function ($q) use ($valor) {
+                        $q->where('nome', 'like', '%' . $valor . '%');
+                    });
+                    break;
+
+                case 'quantidade':
+                    if (is_numeric($valor)) {
+                        $query->whereHas('itens')
+                            ->withSum('itens as quantidade_total', 'quantidade')
+                            ->having('quantidade_total', '=', (int) $valor);
+                    } else {
+                        $query->whereRaw('1 = 0');
+                    }
+                    break;
+
+                case 'data':
+                    try {
+                        $dataFormatted = \Carbon\Carbon::parse($valor)->format('Y-m-d');
+                        $query->whereDate('data_venda', $dataFormatted);
+                    } catch (\Exception $e) {
+                        $query->whereRaw('1 = 0');
+                    }
+                    break;
+
+                default:
+                    $query->whereRaw('1 = 0');
+                    break;
+            }
+        }
+
+        $dados = $query->orderBy('id', 'desc')->get();
+
+        return view('venda.list', [
+            'dados' => $dados,
+            'tipo'  => $tipo,
+            'valor' => $valor
+        ]);
+    }
+
+    public function search(Request $request)
+    {
+        return $this->index($request);
     }
 
     public function create()
     {
         if (session('venda_modo') !== 'nova') {
-
             session()->forget([
                 'itens_venda_temp',
                 'venda_usuario_id',
@@ -51,19 +96,16 @@ class VendaController extends Controller
             ]);
 
             session([
-                'itens_venda_temp' => [],
+                'itens_venda_temp'  => [],
                 'tipo_produto_temp' => 'bicicleta',
-                'venda_modo' => 'nova'
+                'venda_modo'        => 'nova'
             ]);
         }
 
-        $usuarios = Usuario::where('tipo', 'cliente')->get();
-
+        $usuarios     = Usuario::where('tipo', 'cliente')->get();
         $funcionarios = Usuario::where('tipo', 'funcionario')->get();
-
-        $bicicletas = Bicicleta::all();
-
-        $acessorios = Acessorios::all();
+        $bicicletas   = Bicicleta::all();
+        $acessorios   = Acessorios::all();
 
         return view('venda.form', compact(
             'usuarios',
@@ -73,170 +115,255 @@ class VendaController extends Controller
         ));
     }
 
+  
     public function gerenciarItem(Request $request)
-{
-    $acao = $request->input('acao');
+    {
+        // Obtém a ação enviada pelo formulário.
+        $acao = $request->input('acao');
 
-    $modoAtual = session('venda_modo');
+        // Obtém o ID da venda enviada pelo formulário ou salva na sessão.
+        $vendaId = $request->input(
+            'venda_id',
+            session('venda_editando_id')
+        );
 
-    if (!in_array($modoAtual, ['nova', 'editar'], true)) {
-        return redirect()
-            ->route('venda.create')
-            ->withErrors([
-                'venda' => 'A sessão da venda expirou. Inicie novamente.'
+        // Se estiver editando uma venda existente, recupera seus dados.
+        if (!empty($vendaId)) {
+            $vendaExistente = Venda::findOrFail($vendaId);
+
+            session([
+                'venda_editando_id' => $vendaExistente->id,
+                'venda_modo' => 'editar',
             ]);
-    }
 
-    // Preserva o cliente selecionado
-    if ($request->filled('usuario_id')) {
-        session([
-            'venda_usuario_id' => $request->input('usuario_id')
-        ]);
-    }
-
-    // Preserva o funcionário selecionado
-    if ($request->filled('funcionario_id')) {
-        session([
-            'venda_funcionario_id' => $request->input('funcionario_id')
-        ]);
-    }
-
-    // Identifica o tipo de produto
-    $tipo = $request->input(
-        'tipo_produto_temp',
-        session('tipo_produto_temp', 'bicicleta')
-    );
-
-    if (!in_array($tipo, ['bicicleta', 'acessorio'], true)) {
-        return redirect()->back()->withErrors([
-            'tipo_produto_temp' => 'Tipo de produto inválido.'
-        ]);
-    }
-
-    session(['tipo_produto_temp' => $tipo]);
-
-    $itens = session('itens_venda_temp', []);
-
-    // Atualiza a lista de produtos
-    if ($acao === 'mostrar_produtos') {
-        return redirect()->back();
-    }
-
-    // Adiciona um produto à venda
-    if ($acao === 'adicionar_item') {
-        $dados = $request->validate([
-            'produto_temp_id' => 'required|integer|min:1',
-            'quantidade_temp' => 'required|integer|min:1',
-        ], [
-            'produto_temp_id.required' => 'Selecione um produto.',
-            'quantidade_temp.required' => 'Informe a quantidade.',
-            'quantidade_temp.min' => 'A quantidade deve ser maior que zero.',
-        ]);
-
-        if ($tipo === 'bicicleta') {
-            $produto = Bicicleta::findOrFail(
-                $dados['produto_temp_id']
-            );
-
-            $nome = $produto->modelo
-                ?? $produto->nome
-                ?? 'Bicicleta';
-        } else {
-            $produto = Acessorios::findOrFail(
-                $dados['produto_temp_id']
-            );
-
-            $nome = $produto->nome ?? 'Acessório';
-        }
-
-        $produtoId = (int) $produto->id;
-        $quantidade = (int) $dados['quantidade_temp'];
-        $preco = (float) $produto->preco;
-
-        $encontrado = false;
-
-        foreach ($itens as &$item) {
+            // Recupera o cliente caso não tenha sido enviado pelo formulário.
             if (
-                $item['tipo'] === $tipo &&
-                (int) $item['produto_id'] === $produtoId
+                !$request->filled('usuario_id')
+                && !session('venda_usuario_id')
             ) {
-                $item['quantidade'] += $quantidade;
-                $item['preco'] = $preco;
-                $item['nome'] = $nome;
-
-                $encontrado = true;
-                break;
-            }
-        }
-
-        unset($item);
-
-        if (!$encontrado) {
-            $itens[] = [
-                'tipo' => $tipo,
-                'produto_id' => $produtoId,
-                'nome' => $nome,
-                'preco' => $preco,
-                'quantidade' => $quantidade,
-            ];
-        }
-
-        session([
-            'itens_venda_temp' => array_values($itens)
-        ]);
-
-        return redirect()->back();
-    }
-
-    // Remove o item selecionado
-    if (is_string($acao)) {
-        // Corrige eventual barra invertida antes do underline
-        $acao = str_replace('\\_', '_', $acao);
-
-        if (preg_match('/^remover_(\d+)$/', $acao, $matches)) {
-            $indice = (int) $matches[1];
-
-            if (array_key_exists($indice, $itens)) {
-                unset($itens[$indice]);
-
-                // Reorganiza os índices após remover
-                $itens = array_values($itens);
-
                 session([
-                    'itens_venda_temp' => $itens
+                    'venda_usuario_id' => $vendaExistente->usuario_id,
                 ]);
             }
 
-            return redirect()->back();
+            // Recupera o funcionário caso não tenha sido enviado pelo formulário.
+            if (
+                !$request->filled('funcionario_id')
+                && !session('venda_funcionario_id')
+            ) {
+                session([
+                    'venda_funcionario_id' => $vendaExistente->funcionario_id,
+                ]);
+            }
         }
+
+        // Verifica o modo atual da venda.
+        $modoAtual = session('venda_modo');
+
+        // Se a sessão não estiver configurada, retorna para a criação da venda.
+        if (!in_array($modoAtual, ['nova', 'editar'], true)) {
+            return redirect()
+                ->route('venda.create')
+                ->withErrors([
+                    'venda' => 'A sessão da venda expirou. Inicie novamente.',
+                ]);
+        }
+
+        // Atualiza o cliente selecionado na sessão.
+        if ($request->filled('usuario_id')) {
+            session([
+                'venda_usuario_id' => $request->input('usuario_id'),
+            ]);
+        }
+
+        // Atualiza o funcionário selecionado na sessão.
+        if ($request->filled('funcionario_id')) {
+            session([
+                'venda_funcionario_id' => $request->input('funcionario_id'),
+            ]);
+        }
+
+        // Obtém o tipo de produto selecionado.
+        $tipo = $request->input(
+            'tipo_produto_temp',
+            session('tipo_produto_temp', 'bicicleta')
+        );
+
+        // Aceita somente bicicletas ou acessórios.
+        if (!in_array($tipo, ['bicicleta', 'acessorio'], true)) {
+            return redirect()
+                ->back()
+                ->withErrors([
+                    'tipo_produto_temp' => 'Tipo de produto inválido.',
+                ]);
+        }
+
+        // Salva o tipo de produto selecionado na sessão.
+        session([
+            'tipo_produto_temp' => $tipo,
+        ]);
+
+        // Recupera os itens temporários da venda.
+        $itens = session('itens_venda_temp', []);
+
+        // Define para qual tela o usuário deve retornar.
+        $redirecionar = function () {
+            if (
+                session('venda_modo') === 'editar'
+                && session('venda_editando_id')
+            ) {
+                return redirect()->route(
+                    'venda.edit',
+                    session('venda_editando_id')
+                );
+            }
+
+            return redirect()->route('venda.create');
+        };
+
+        // Ação para mostrar os produtos disponíveis.
+        if ($acao === 'mostrar_produtos') {
+            return $redirecionar();
+        }
+
+        // Ação para adicionar um produto à venda.
+        if ($acao === 'adicionar_item') {
+
+            // Valida os dados enviados pelo formulário.
+            $dados = $request->validate([
+                'produto_temp_id' => 'required|integer|min:1',
+                'quantidade_temp' => 'required|integer|min:1',
+            ], [
+                'produto_temp_id.required' => 'Selecione um produto.',
+                'quantidade_temp.required' => 'Informe a quantidade.',
+                'quantidade_temp.min' => 'A quantidade deve ser maior que zero.',
+            ]);
+
+            // Busca o produto de acordo com o tipo selecionado.
+            if ($tipo === 'bicicleta') {
+                $produto = Bicicleta::findOrFail(
+                    $dados['produto_temp_id']
+                );
+
+                $nome = $produto->modelo
+                    ?? $produto->nome
+                    ?? 'Bicicleta';
+
+            } else {
+                $produto = Acessorios::findOrFail(
+                    $dados['produto_temp_id']
+                );
+
+                $nome = $produto->nome ?? 'Acessório';
+            }
+
+            // Obtém os dados do produto.
+            $produtoId = (int) $produto->id;
+            $quantidade = (int) $dados['quantidade_temp'];
+            $preco = (float) $produto->preco;
+
+            // Verifica se o produto já está na lista.
+            $encontrado = false;
+
+            foreach ($itens as &$item) {
+                if (
+                    $item['tipo'] === $tipo
+                    && (int) $item['produto_id'] === $produtoId
+                ) {
+                    // Se já existe, aumenta a quantidade.
+                    $item['quantidade'] += $quantidade;
+
+                    // Atualiza o preço e o nome do produto.
+                    $item['preco'] = $preco;
+                    $item['nome'] = $nome;
+
+                    $encontrado = true;
+
+                    break;
+                }
+            }
+
+            // Libera a referência utilizada pelo foreach.
+            unset($item);
+
+            // Se o produto ainda não existe na lista, adiciona um novo item.
+            if (!$encontrado) {
+                $itens[] = [
+                    'tipo' => $tipo,
+                    'produto_id' => $produtoId,
+                    'nome' => $nome,
+                    'preco' => $preco,
+                    'quantidade' => $quantidade,
+                ];
+            }
+
+            // Salva a lista atualizada na sessão.
+            session([
+                'itens_venda_temp' => array_values($itens),
+            ]);
+
+            // Retorna para a tela da venda.
+            return $redirecionar();
+        }
+
+        // Ação para remover um item da venda.
+        if (
+            is_string($acao)
+            && preg_match('/^remover_(\d+)$/', $acao, $matches)
+        ) {
+            // Obtém o índice do item que será removido.
+            $indice = (int) $matches[1];
+
+            // Verifica se o item existe na lista.
+            if (array_key_exists($indice, $itens)) {
+
+                // Remove o item selecionado.
+                unset($itens[$indice]);
+
+                // Reorganiza os índices da lista.
+                $itens = array_values($itens);
+
+                // Salva a lista atualizada na sessão.
+                session([
+                    'itens_venda_temp' => $itens,
+                ]);
+            }
+
+            // Retorna para a tela da venda.
+            return $redirecionar();
+        }
+
+        // Caso a ação não seja reconhecida, retorna com uma mensagem de erro.
+        return redirect()
+            ->back()
+            ->withErrors([
+                'venda' => 'Ação não reconhecida.',
+            ]);
     }
 
-    return redirect()->back()->withErrors([
-        'venda' => 'Ação não reconhecida.'
-    ]);
-}
 
+    // Método privado responsável pelas validações de formulário
     private function validateForm(Request $request)
     {
         $request->validate([
-            'usuario_id' => 'required|integer|exists:usuario,id',
-            'funcionario_id' => 'required|integer|exists:usuario,id',
-            'itens' => 'required|array|min:1',
-            'itens.*.tipo' => 'required|in:bicicleta,acessorio',
-            'itens.*.produto_id' => 'required|integer|min:1',
-            'itens.*.quantidade' => 'required|integer|min:1',
-            'itens.*.preco' => 'required|numeric|min:0',
+            'usuario_id'          => 'required|integer|exists:usuario,id',
+            'funcionario_id'      => 'required|integer|exists:usuario,id',
+            'itens'               => 'required|array|min:1',
+            'itens.*.tipo'        => 'required|in:bicicleta,acessorio',
+            'itens.*.produto_id'  => 'required|integer|min:1',
+            'itens.*.quantidade'  => 'required|integer|min:1',
+            'itens.*.preco'       => 'required|numeric|min:0',
         ], [
-            'usuario_id.required' => 'Selecione um cliente.',
-            'funcionario_id.required' => 'Selecione um funcionário.',
-            'itens.required' => 'Adicione pelo menos um item à venda.',
-            'itens.min' => 'Adicione pelo menos um item à venda.',
-            'itens.*.tipo.required' => 'O tipo de produto é obrigatório.',
+            'usuario_id.required'         => 'Selecione um cliente.',
+            'funcionario_id.required'     => 'Selecione um funcionário.',
+            'itens.required'              => 'Adicione pelo menos um item à venda.',
+            'itens.min'                   => 'Adicione pelo menos um item à venda.',
+            'itens.*.tipo.required'       => 'O tipo de produto é obrigatório.',
             'itens.*.produto_id.required' => 'Selecione um produto válido.',
-            'itens.*.quantidade.min' => 'A quantidade deve ser maior que zero.',
+            'itens.*.quantidade.min'      => 'A quantidade deve ser maior que zero.',
         ]);
 
-        $clienteValido = Usuario::where('id',$request->usuario_id)
+        $clienteValido = Usuario::where('id', $request->usuario_id)
             ->where('tipo', 'cliente')
             ->exists();
 
@@ -246,7 +373,7 @@ class VendaController extends Controller
             ]);
         }
 
-        $funcionarioValido = Usuario::where('id',$request->funcionario_id)
+        $funcionarioValido = Usuario::where('id', $request->funcionario_id)
             ->where('tipo', 'funcionario')
             ->exists();
 
@@ -256,27 +383,16 @@ class VendaController extends Controller
             ]);
         }
 
-        foreach ($request->input('itens', []) as $indice =>$item) {
-
+        foreach ($request->input('itens', []) as $indice => $item) {
             if ($item['tipo'] === 'bicicleta') {
-
-                $existe = Bicicleta::where(
-                    'id',
-                    $item['produto_id']
-                )->exists();
-
+                $existe = Bicicleta::where('id', $item['produto_id'])->exists();
             } else {
-
-                $existe = Acessorios::where(
-                    'id',
-                    $item['produto_id']
-                )->exists();
+                $existe = Acessorios::where('id', $item['produto_id'])->exists();
             }
 
             if (!$existe) {
                 throw \Illuminate\Validation\ValidationException::withMessages([
-                    "itens.$indice.produto_id" =>
-                        'Um dos produtos selecionados não existe mais.'
+                    "itens.$indice.produto_id" => 'Um dos produtos selecionados não existe mais.'
                 ]);
             }
         }
@@ -287,41 +403,32 @@ class VendaController extends Controller
         $this->validateForm($request);
 
         DB::transaction(function () use ($request) {
-
             $venda = Venda::create([
-                'usuario_id' => $request->usuario_id,
+                'usuario_id'     => $request->usuario_id,
                 'funcionario_id' => $request->funcionario_id,
-                'data_venda' => now(),
-                'valor_total' => 0,
+                'data_venda'     => now(),
+                'valor_total'    => 0,
             ]);
 
             $valorTotal = 0;
 
-            foreach ($request->input('itens', []) as$item) {
+            foreach ($request->input('itens', []) as $item) {
+                $quantidade = (int) $item['quantidade'];
+                $preco      = (float) $item['preco'];
+                $subtotal   = $quantidade * $preco;
 
-                $quantidade = (int)$item['quantidade'];
-                $preco = (float)$item['preco'];
-
-                $subtotal = $quantidade * $preco;
-
-                $valorTotal +=$subtotal;
+                $valorTotal += $subtotal;
 
                 ItemVenda::create([
-                    'venda_id' => $venda->id,
-                    'bicicleta_id' => $item['tipo'] === 'bicicleta'
-                        ? $item['produto_id']
-                        : null,
-                    'acessorio_id' => $item['tipo'] === 'acessorio'
-                        ? $item['produto_id']
-                        : null,
-                    'quantidade' => $quantidade,
+                    'venda_id'       => $venda->id,
+                    'bicicleta_id'   => $item['tipo'] === 'bicicleta' ? $item['produto_id'] : null,
+                    'acessorio_id'   => $item['tipo'] === 'acessorio' ? $item['produto_id'] : null,
+                    'quantidade'     => $quantidade,
                     'preco_unitario' => $preco,
                 ]);
             }
 
-            $venda->update([
-                'valor_total' => $valorTotal
-            ]);
+            $venda->update(['valor_total' => $valorTotal]);
         });
 
         session()->forget([
@@ -333,14 +440,12 @@ class VendaController extends Controller
             'venda_modo'
         ]);
 
-        return redirect()
-            ->route('venda.index')
-            ->with('success', 'Venda registrada com sucesso!');
+        return redirect()->route('venda.index')->with('success', 'Venda registrada com sucesso!');
     }
 
     public function edit($id)
     {
-        $data = Venda::with([ 'usuario', 'funcionario', 'itens.bicicleta', 'itens.acessorio' ])->findOrFail($id);
+        $data = Venda::with(['usuario', 'funcionario', 'itens.bicicleta', 'itens.acessorio'])->findOrFail($id);
 
         if (
             session('venda_modo') !== 'editar' ||
@@ -348,47 +453,45 @@ class VendaController extends Controller
         ) {
             $itensAtuais = [];
 
-            foreach ($data->itens as$detalhe) {
-
-                $produto =$detalhe->bicicleta
-                    ?? $detalhe->acessorio;
+            foreach ($data->itens as $detalhe) {
+                $produto = $detalhe->bicicleta ?? $detalhe->acessorio;
 
                 if (!$produto) {
                     continue;
                 }
 
-                $tipo =$detalhe->bicicleta_id
-                    ? 'bicicleta'
-                    : 'acessorio';
+                $tipo = $detalhe->bicicleta_id ? 'bicicleta' : 'acessorio';
 
                 $itensAtuais[] = [
-                    'tipo' => $tipo,
+                    'tipo'       => $tipo,
                     'produto_id' => $produto->id,
-                    'nome' => $produto->modelo
-                        ?? $produto->nome
-                        ?? 'Produto',
-                    'preco' => (float) $detalhe->preco_unitario,
+                    'nome'       => $produto->modelo ?? $produto->nome ?? 'Produto',
+                    'preco'      => (float) $detalhe->preco_unitario,
                     'quantidade' => (int) $detalhe->quantidade,
                 ];
             }
 
             session([
-                'itens_venda_temp' => $itensAtuais,
-                'venda_usuario_id' => $data->usuario_id,
+                'itens_venda_temp'     => $itensAtuais,
+                'venda_usuario_id'     => $data->usuario_id,
                 'venda_funcionario_id' => $data->funcionario_id,
-                'tipo_produto_temp' => 'bicicleta',
-                'venda_editando_id' => $data->id,
-                'venda_modo' => 'editar',
+                'tipo_produto_temp'    => 'bicicleta',
+                'venda_editando_id'    => $data->id,
+                'venda_modo'           => 'editar',
             ]);
+        } else {
+            if (!session('venda_usuario_id')) {
+                session(['venda_usuario_id' => $data->usuario_id]);
+            }
+            if (!session('venda_funcionario_id')) {
+                session(['venda_funcionario_id' => $data->funcionario_id]);
+            }
         }
 
-        $usuarios = Usuario::where('tipo', 'cliente')->get();
-
+        $usuarios     = Usuario::where('tipo', 'cliente')->get();
         $funcionarios = Usuario::where('tipo', 'funcionario')->get();
-
-        $bicicletas = Bicicleta::all();
-
-        $acessorios = Acessorios::all();
+        $bicicletas   = Bicicleta::all();
+        $acessorios   = Acessorios::all();
 
         return view('venda.form', compact(
             'data',
@@ -399,44 +502,37 @@ class VendaController extends Controller
         ));
     }
 
-    public function update(Request $request,$id)
+    public function update(Request $request, $id)
     {
         $this->validateForm($request);
 
-        DB::transaction(function () use ($request,$id) {
-
+        DB::transaction(function () use ($request, $id) {
             $venda = Venda::findOrFail($id);
 
             ItemVenda::where('venda_id', $venda->id)->delete();
 
             $valorTotal = 0;
 
-            foreach ($request->input('itens', []) as$item) {
+            foreach ($request->input('itens', []) as $item) {
+                $quantidade = (int) $item['quantidade'];
+                $preco      = (float) $item['preco'];
+                $subtotal   = $quantidade * $preco;
 
-                $quantidade = (int)$item['quantidade'];
-                $preco = (float)$item['preco'];
-
-                $subtotal = $quantidade * $preco;
-
-                $valorTotal +=$subtotal;
+                $valorTotal += $subtotal;
 
                 ItemVenda::create([
-                    'venda_id' => $venda->id,
-                    'bicicleta_id' => $item['tipo'] === 'bicicleta'
-                        ? $item['produto_id']
-                        : null,
-                    'acessorio_id' => $item['tipo'] === 'acessorio'
-                        ? $item['produto_id']
-                        : null,
-                    'quantidade' => $quantidade,
+                    'venda_id'       => $venda->id,
+                    'bicicleta_id'   => $item['tipo'] === 'bicicleta' ? $item['produto_id'] : null,
+                    'acessorio_id'   => $item['tipo'] === 'acessorio' ? $item['produto_id'] : null,
+                    'quantidade'     => $quantidade,
                     'preco_unitario' => $preco,
                 ]);
             }
 
             $venda->update([
-                'usuario_id' => $request->usuario_id,
+                'usuario_id'     => $request->usuario_id,
                 'funcionario_id' => $request->funcionario_id,
-                'valor_total' => $valorTotal,
+                'valor_total'    => $valorTotal,
             ]);
         });
 
@@ -449,88 +545,26 @@ class VendaController extends Controller
             'venda_modo'
         ]);
 
-        return redirect()
-            ->route('venda.index')
-            ->with('success', 'Venda atualizada com sucesso!');
+        return redirect()->route('venda.index')->with('success', 'Venda atualizada com sucesso!');
     }
 
     public function destroy($id)
     {
         DB::transaction(function () use ($id) {
-
             $venda = Venda::findOrFail($id);
-
             $venda->itens()->delete();
-
             $venda->delete();
         });
 
-        return redirect()
-            ->route('venda.index')
-            ->with('success', 'Venda excluída com sucesso!');
+        return redirect()->route('venda.index')->with('success', 'Venda removida com sucesso!');
     }
 
     public function show($id)
     {
-        $venda = Venda::with([ 'usuario', 'funcionario', 'itens.bicicleta', 'itens.acessorio' ])->findOrFail($id);
+        $venda = Venda::with(['usuario', 'funcionario', 'itens.bicicleta', 'itens.acessorio'])->findOrFail($id);
 
         return view('venda.itens', compact('venda'));
     }
-
-public function search(Request $request)
-{
-    $tipo = $request->input('tipo');
-    $valor = trim($request->input('valor', ''));
-
-    $query = Venda::with(['usuario', 'funcionario', 'itens']);
-
-    if ($valor !== '') {
-        switch ($tipo) {
-            case 'usuario':
-                $query->whereHas('usuario', function ($q) use ($valor) {
-                    $q->where('nome', 'like', '%' . $valor . '%');
-                });
-                break;
-
-            case 'funcionario':
-                $query->whereHas('funcionario', function ($q) use ($valor) {
-                    $q->where('nome', 'like', '%' . $valor . '%');
-                });
-                break;
-
-            case 'quantidade':
-    if (is_numeric($valor)) {
-        $query->whereHas('itens')
-            ->withSum('itens as quantidade_total', 'quantidade')
-            ->having('quantidade_total', '=', (int) $valor);
-    } else {
-        $query->whereRaw('1 = 0');
-    }
-    break;
-
-            case 'data':
-    if (!empty($valor)) {
-        try {
-            $data = \Carbon\Carbon::parse($valor)->format('Y-m-d');
-
-            $query->whereDate('data_venda', $data);
-
-        } catch (\Exception $e) {
-            $query->whereRaw('1 = 0');
-        }
-    }
-    break;
-
-            default:
-                $query->whereRaw('1 = 0');
-                break;
-        }
-    }
-
-    $dados = $query->orderBy('data_venda', 'desc')->get();
-
-    return view('venda.list', compact('dados'));
-}
 
     public function report()
     {
@@ -544,12 +578,12 @@ public function search(Request $request)
         ->get();
 
         $data = [
-            'titulo' => 'Relatório de Vendas',
-            'date' => date('d/m/Y'),
-            'dados' => $vendas,
+            'titulo' => 'Relatório Listagem de Vendas',
+            'date'   => date('d/m/Y'),
+            'dados'  => $vendas,
         ];
 
-        $pdf = Pdf::loadView('venda.report',$data);
+        $pdf = Pdf::loadView('venda.report', $data);
 
         return $pdf->download('relatorio_vendas.pdf');
     }
@@ -559,7 +593,7 @@ public function search(Request $request)
         $vendas = Venda::all();
 
         return view('venda.chart', [
-            'chart' => $chart->build(),
+            'chart'  => $chart->build(),
             'vendas' => $vendas,
         ]);
     }

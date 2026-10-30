@@ -15,7 +15,7 @@ class UsuarioFactory extends Factory
             'nome'            => $this->faker->name(),
             'email'           => $this->faker->unique()->safeEmail(),
             'telefone'        => $this->faker->phoneNumber(),
-            'tipo'            => $this->faker->randomElement(['usuario', 'funcionario']),
+            'tipo'            => $this->faker->randomElement(['cliente', 'funcionario']),
             'cpf'             => $this->faker->numerify('###.###.###-##'),
             'data_nascimento' => $this->faker->date('Y-m-d', '-18 years'),
         ];
