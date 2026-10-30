@@ -14,8 +14,7 @@
     $itensVenda = session('itens_venda_temp', []);
     $tipoSelecionado = session('tipo_produto_temp', 'bicicleta');
 
-    $clienteSelecionado = old(
-        'usuario_id',
+    $clienteSelecionado = old('usuario_id',
         $data->usuario_id ?? session('venda_usuario_id', '')
     );
 
@@ -28,8 +27,7 @@
 @endphp
 
 <div class="container py-4">
-
-    {{-- CABEÇALHO --}}
+    //verifica se é edição ou cadastro por true e false
     <div class="d-flex flex-wrap justify-content-between align-items-center gap-3 mb-4">
         <h3 class="mb-0">
             {{ $editando ? 'Editar Venda #' . $data->id : 'Registrar Nova Venda' }}
@@ -40,7 +38,6 @@
         </a>
     </div>
 
-    {{-- MENSAGENS DE ERRO --}}
     @if ($errors->any())
         <div class="alert alert-danger">
             <strong>Verifique os seguintes erros:</strong>
@@ -51,7 +48,7 @@
             </ul>
         </div>
     @endif
-
+    
     <form id="vendaForm" action="{{ $action }}" method="POST">
         @csrf
 
@@ -59,7 +56,7 @@
             @method('PUT')
         @endif
 
-        {{-- DADOS DA VENDA --}}
+
         <div class="card shadow-sm mb-4">
             <div class="card-header">
                 <h5 class="mb-0">1. Dados da venda</h5>

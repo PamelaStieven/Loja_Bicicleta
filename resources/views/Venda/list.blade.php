@@ -8,14 +8,15 @@
     <div class="d-flex justify-content-between align-items-center mb-3">
         <h3 class="mb-0">Vendas Registradas</h3>
     </div>
-    //mensagem de sucesso
+    {{--mensagem de sucesso--}}
+
     @if (session('success'))
         <div class="alert alert-success alert-dismissible fade show" role="alert">
             {{ session('success') }}
             <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
         </div>
     @endif
-    //mensagem de erro
+    {{--mensagem de erro--}}
     @if ($errors->any())
         <div class="alert alert-danger alert-dismissible fade show" role="alert">
             <strong>Não foi possível concluir a operação:</strong>
@@ -28,10 +29,10 @@
         </div>
     @endif
 
-    // Formulário de pesquisa
+    {{-- Formulário de pesquisa --}}
     <form action="{{ route('venda.search') }}" method="POST" class="d-flex flex-wrap gap-2 my-3">
         @csrf
-        //tipo de pesquisa 
+        {{-- tipo de pesquisa --}}
         <select name="tipo" class="form-select w-auto" id="selectTipo">
             <option value="usuario" {{ request('tipo') === 'usuario' ? 'selected' : '' }}>Cliente</option>
             <option value="funcionario" {{ request('tipo') === 'funcionario' ? 'selected' : '' }}>Funcionário</option>
@@ -76,6 +77,7 @@
             <tbody>
                 @forelse ($dados as $item)
                     <tr>
+                        {{-- acessar os dados da venda --}}
                         <td>{{ $item->id }}</td>
                         <td>{{ $item->usuario->nome ?? '-' }}</td>
                         <td>{{ $item->funcionario->nome ?? '-' }}</td>
