@@ -553,7 +553,7 @@ public function search(Request $request)
 
         return $pdf->download('relatorio_vendas.pdf');
     }
-
+----
     public function chart(VendaChart $chart)
     {
         $vendas = Venda::all();

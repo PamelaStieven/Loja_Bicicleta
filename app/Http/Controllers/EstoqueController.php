@@ -4,7 +4,6 @@ namespace App\Http\Controllers;
 
 use App\Models\Estoque;
 use Illuminate\Http\Request;
-use ArielMejiaDev\LarapexCharts\LarapexChart;
 use Barryvdh\DomPDF\Facade\Pdf;
 use App\Charts\EstoqueChart;
 
@@ -42,7 +41,7 @@ class EstoqueController extends Controller
         ]);
     }
 
-    public function store(Request $request)//validar dados, cria e redireciona
+    public function store(Request $request)
     {
         $this->validateForm($request);
 
@@ -90,23 +89,57 @@ class EstoqueController extends Controller
             ->route('estoque.index')
             ->with('success', 'Produto removido do estoque com sucesso!');
     }
-    //buscar registo especifico
-    public function show($id) 
+
+    public function show($id)
     {
         $estoque = Estoque::findOrFail($id);
 
         return view('Estoque.show', compact('estoque'));
     }
-    //filtrar e buscar registros
+
+    // Buscar registros por produto, quantidade ou preço
     public function search(Request $request)
     {
-        $tipo = $request->input('tipo');
-        $valor = $request->input('valor');
+        $request->validate([
+            'tipo' => 'required|in:produto,quantidade,preco',
+            'valor' => 'required|string',
+        ], [
+            'tipo.required' => 'Selecione o tipo de pesquisa.',
+            'valor.required' => 'Digite um valor para pesquisar.',
+        ]);
+
+        $tipo = $request->tipo;
+        $valor = trim($request->valor);
 
         $query = Estoque::query();
 
-        if ($tipo === 'produto' && !empty($valor)) {
-            $query->where('produto', 'like', '%' . $valor . '%');
+        switch ($tipo) {
+            case 'produto':
+                $query->where('produto', 'like', '%' . $valor . '%');
+                break;
+
+            case 'quantidade':
+                if (!is_numeric($valor) || (int) $valor < 0) {
+                    return back()->withErrors([
+                        'valor' => 'Digite uma quantidade válida.'
+                    ])->withInput();
+                }
+
+                $query->where('quantidade', '=', (int) $valor);
+                break;
+
+            case 'preco':
+                // Aceita preços como 25,50 ou 25.50
+                $preco = str_replace(',', '.', $valor);
+
+                if (!is_numeric($preco) || (float) $preco < 0) {
+                    return back()->withErrors([
+                        'valor' => 'Digite um preço válido.'
+                    ])->withInput();
+                }
+
+                $query->where('preco', '=', (float) $preco);
+                break;
         }
 
         $estoques = $query->orderBy('id', 'desc')->get();
@@ -129,14 +162,13 @@ class EstoqueController extends Controller
         return $pdf->download('relatorio_estoque.pdf');
     }
 
-     public function chart(EstoqueChart $chart)
+    public function chart(EstoqueChart $chart)
     {
         $estoques = Estoque::all();
-        
+
         return view('Estoque.chart', [
             'chart' => $chart->build(),
             'estoques' => $estoques
         ]);
     }
-
 }

@@ -6,6 +6,7 @@ use App\Models\Fornecedor;
 use App\Charts\FornecedorChart;
 use Barryvdh\DomPDF\Facade\Pdf; 
 use Illuminate\Validation\Rule; 
+use Illuminate\Http\Request;
 
 class FornecedorController extends Controller
 {
@@ -48,7 +49,7 @@ class FornecedorController extends Controller
             'endereco'      => 'required|string|max:255',
             'cnpj'          => [
                 'required',
-                Rule::unique('fornecedor', 'cnpj')->ignore($id), // 2. Agora usa o $id recebido aqui
+                Rule::unique('fornecedor', 'cnpj')->ignore($id),
             ],
             'prazo_entrega' => 'nullable|integer|min:0',
             'valor'         => 'nullable|numeric|min:0',
