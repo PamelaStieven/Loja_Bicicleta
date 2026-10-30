@@ -21,7 +21,7 @@ class Venda extends Model
         'valor_total',
         'data_venda',
     ];
-
+    // formatação de data e valor
     protected $casts = [
         'data_venda' => 'datetime',
         'valor_total' => 'decimal:2',

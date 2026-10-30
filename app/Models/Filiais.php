@@ -8,7 +8,7 @@ use Illuminate\Database\Eloquent\Model;
 class Filiais extends Model
 {
     use HasFactory;
-
+    // Define o nome da tabela associada ao modelo
     protected $table = 'filiais'; 
 
     protected $fillable = [ 

@@ -16,7 +16,7 @@ class Estoque extends Model
         'preco',
         'bicicleta_id',
     ];
-
+    // Define a relação com o modelo Bicicleta
     public function bicicleta()
     {
         return $this->belongsTo(Bicicleta::class, 'bicicleta_id');

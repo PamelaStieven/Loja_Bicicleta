@@ -8,15 +8,14 @@
     <div class="d-flex justify-content-between align-items-center mb-3">
         <h3 class="mb-0">Vendas Registradas</h3>
     </div>
-
-    {{-- MENSAGENS DE FEEDBACK --}}
+    //mensagem de sucesso
     @if (session('success'))
         <div class="alert alert-success alert-dismissible fade show" role="alert">
             {{ session('success') }}
             <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
         </div>
     @endif
-
+    //mensagem de erro
     @if ($errors->any())
         <div class="alert alert-danger alert-dismissible fade show" role="alert">
             <strong>Não foi possível concluir a operação:</strong>
@@ -29,10 +28,10 @@
         </div>
     @endif
 
-    {{-- FILTRO DE PESQUISA E AÇÕES --}}
+    // Formulário de pesquisa
     <form action="{{ route('venda.search') }}" method="POST" class="d-flex flex-wrap gap-2 my-3">
         @csrf
-
+        //tipo de pesquisa 
         <select name="tipo" class="form-select w-auto" id="selectTipo">
             <option value="usuario" {{ request('tipo') === 'usuario' ? 'selected' : '' }}>Cliente</option>
             <option value="funcionario" {{ request('tipo') === 'funcionario' ? 'selected' : '' }}>Funcionário</option>
@@ -58,7 +57,7 @@
         <a href="{{ route('venda.report') }}" class="btn btn-warning text-dark">Relatórios</a>
     </form>
 
-    {{-- TABELA DE VENDAS --}}
+    
     <div class="table-responsive">
         <table class="table table-striped table-hover align-middle shadow-sm">
             <thead class="table-dark">

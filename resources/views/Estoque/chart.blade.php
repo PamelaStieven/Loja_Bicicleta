@@ -15,7 +15,7 @@
     <div class="card shadow-sm mb-4">
         <div class="card-header bg-dark text-white">Visualização Gráfica de Quantidade em Estoque</div>
         <div class="card-body text-center" style="min-height: 350px;">
-            {!! $chart->container() !!}
+            {!! $chart->container() !!} //HTML
         </div>
     </div>
 
@@ -29,7 +29,7 @@
                         <th>ID</th>
                         <th>Produto</th>
                         <th>Quantidade</th>
-                        <th>Preço Unitário</th>
+                        <th>Pre Uçonitário</th>
                         <th>Valor Total em Stock</th>
                     </tr>
                 </thead>
@@ -49,7 +49,7 @@
     </div>
 </div>
 
-<!-- Scripts obrigatórios do Larapex Charts carregados diretamente -->
+//Scripts obrigatórios do Larapex Charts carregados diretamente
 <script src="{{ $chart->cdn() }}"></script>
 {!! $chart->script() !!}
 @endsection

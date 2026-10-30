@@ -15,7 +15,7 @@ use Illuminate\Support\Facades\DB;
 class VendaController extends Controller
 {
     public function index(Request $request)
-    {
+    {   //limpadados antigos para não dar erro
         session()->forget([
             'itens_venda_temp',
             'venda_usuario_id',
@@ -31,7 +31,7 @@ class VendaController extends Controller
         $query = Venda::with(['usuario', 'funcionario', 'itens.bicicleta', 'itens.acessorio']);
 
         if (!empty($valor)) {
-            switch ($tipo) {
+            switch ($tipo) { //verifica o tipo de filtro e aplica a consulta correspondente
                 case 'usuario':
                     $query->whereHas('usuario', function ($q) use ($valor) {
                         $q->where('nome', 'like', '%' . $valor . '%');
@@ -46,7 +46,7 @@ class VendaController extends Controller
 
                 case 'quantidade':
                     if (is_numeric($valor)) {
-                        $query->whereHas('itens')
+                        $query->whereHas('itens')//consulta às vendas que possuem itens relacionados
                             ->withSum('itens as quantidade_total', 'quantidade')
                             ->having('quantidade_total', '=', (int) $valor);
                     } else {
@@ -85,9 +85,9 @@ class VendaController extends Controller
 
     public function create()
     {
-        if (session('venda_modo') !== 'nova') {
+        if (session('venda_modo') !== 'nova') { //!== :não é idêntico a
             session()->forget([
-                'itens_venda_temp',
+                'itens_venda_temp', 
                 'venda_usuario_id',
                 'venda_funcionario_id',
                 'tipo_produto_temp',
@@ -118,16 +118,16 @@ class VendaController extends Controller
   
     public function gerenciarItem(Request $request)
     {
-        // Obtém a ação enviada pelo formulário.
+        //informa o que o usuário deseja fazer. 
         $acao = $request->input('acao');
 
-        // Obtém o ID da venda enviada pelo formulário ou salva na sessão.
+        // descobre o que esta sendo editado
         $vendaId = $request->input(
             'venda_id',
             session('venda_editando_id')
         );
 
-        // Se estiver editando uma venda existente, recupera seus dados.
+        // Verificando se existe esse id venda.
         if (!empty($vendaId)) {
             $vendaExistente = Venda::findOrFail($vendaId);
 
@@ -136,20 +136,22 @@ class VendaController extends Controller
                 'venda_modo' => 'editar',
             ]);
 
-            // Recupera o cliente caso não tenha sido enviado pelo formulário.
+            // Recupera o cliente
             if (
                 !$request->filled('usuario_id')
-                && !session('venda_usuario_id')
+                && 
+                !session('venda_usuario_id')
             ) {
                 session([
                     'venda_usuario_id' => $vendaExistente->usuario_id,
                 ]);
             }
 
-            // Recupera o funcionário caso não tenha sido enviado pelo formulário.
+            // Recupera o funcionário 
             if (
                 !$request->filled('funcionario_id')
-                && !session('venda_funcionario_id')
+                && 
+                !session('venda_funcionario_id')
             ) {
                 session([
                     'venda_funcionario_id' => $vendaExistente->funcionario_id,
@@ -160,7 +162,7 @@ class VendaController extends Controller
         // Verifica o modo atual da venda.
         $modoAtual = session('venda_modo');
 
-        // Se a sessão não estiver configurada, retorna para a criação da venda.
+        // !in_array :verifica se o valor existe dentro de uma lista
         if (!in_array($modoAtual, ['nova', 'editar'], true)) {
             return redirect()
                 ->route('venda.create')
@@ -169,7 +171,7 @@ class VendaController extends Controller
                 ]);
         }
 
-        // Atualiza o cliente selecionado na sessão.
+        // Atualiza o cliente selecionado na sessão, guarda ID.
         if ($request->filled('usuario_id')) {
             session([
                 'venda_usuario_id' => $request->input('usuario_id'),
@@ -198,15 +200,15 @@ class VendaController extends Controller
                 ]);
         }
 
-        // Salva o tipo de produto selecionado na sessão.
+        // Salva o tipo de produto selecionado na sessão
         session([
             'tipo_produto_temp' => $tipo,
         ]);
 
-        // Recupera os itens temporários da venda.
+        // Recupera os itens temporários da venda ja add
         $itens = session('itens_venda_temp', []);
 
-        // Define para qual tela o usuário deve retornar.
+        // Define para qual tela o usuário deve retornar edit ou create
         $redirecionar = function () {
             if (
                 session('venda_modo') === 'editar'
@@ -221,15 +223,15 @@ class VendaController extends Controller
             return redirect()->route('venda.create');
         };
 
-        // Ação para mostrar os produtos disponíveis.
+        // Ação para mostrar os produtos disponíveis
         if ($acao === 'mostrar_produtos') {
             return $redirecionar();
         }
 
-        // Ação para adicionar um produto à venda.
+        // Ação para adicionar um produto à venda
         if ($acao === 'adicionar_item') {
 
-            // Valida os dados enviados pelo formulário.
+            
             $dados = $request->validate([
                 'produto_temp_id' => 'required|integer|min:1',
                 'quantidade_temp' => 'required|integer|min:1',
@@ -239,7 +241,7 @@ class VendaController extends Controller
                 'quantidade_temp.min' => 'A quantidade deve ser maior que zero.',
             ]);
 
-            // Busca o produto de acordo com o tipo selecionado.
+            // verifica se o produto selecionado é uma bicicleta ou um acessório
             if ($tipo === 'bicicleta') {
                 $produto = Bicicleta::findOrFail(
                     $dados['produto_temp_id']
@@ -265,6 +267,8 @@ class VendaController extends Controller
             // Verifica se o produto já está na lista.
             $encontrado = false;
 
+            // Percorre os itens temporários da venda para verificar se o produto já existe
+            // Se já existir, atualiza a quantidade e o preço sem duplicar o item
             foreach ($itens as &$item) {
                 if (
                     $item['tipo'] === $tipo
@@ -283,10 +287,10 @@ class VendaController extends Controller
                 }
             }
 
-            // Libera a referência utilizada pelo foreach.
+            // encerra a referência utilizada &item.
             unset($item);
 
-            // Se o produto ainda não existe na lista, adiciona um novo item.
+            // Se o produto ainda não existe na lista, adiciona um novo item
             if (!$encontrado) {
                 $itens[] = [
                     'tipo' => $tipo,
@@ -297,43 +301,39 @@ class VendaController extends Controller
                 ];
             }
 
-            // Salva a lista atualizada na sessão.
             session([
                 'itens_venda_temp' => array_values($itens),
             ]);
 
-            // Retorna para a tela da venda.
             return $redirecionar();
         }
 
         // Ação para remover um item da venda.
         if (
-            is_string($acao)
-            && preg_match('/^remover_(\d+)$/', $acao, $matches)
+            is_string($acao) 
+            && preg_match('/^remover_(\d+)$/', $acao, $matches) //verifica se um texto corresponde a '/^remover_(\d+)$/'
         ) {
             // Obtém o índice do item que será removido.
             $indice = (int) $matches[1];
 
-            // Verifica se o item existe na lista.
+            // Verifica 
             if (array_key_exists($indice, $itens)) {
 
-                // Remove o item selecionado.
+                // Remove
                 unset($itens[$indice]);
 
-                // Reorganiza os índices da lista.
+                // Reorganiza
                 $itens = array_values($itens);
 
-                // Salva a lista atualizada na sessão.
+                // Salva
                 session([
                     'itens_venda_temp' => $itens,
                 ]);
             }
 
-            // Retorna para a tela da venda.
             return $redirecionar();
         }
 
-        // Caso a ação não seja reconhecida, retorna com uma mensagem de erro.
         return redirect()
             ->back()
             ->withErrors([
@@ -342,7 +342,6 @@ class VendaController extends Controller
     }
 
 
-    // Método privado responsável pelas validações de formulário
     private function validateForm(Request $request)
     {
         $request->validate([
@@ -382,7 +381,7 @@ class VendaController extends Controller
                 'funcionario_id' => 'Selecione um funcionário válido.'
             ]);
         }
-
+        //percorre a lista itens; se ela não estiver disponível, usa um array vazio
         foreach ($request->input('itens', []) as $indice => $item) {
             if ($item['tipo'] === 'bicicleta') {
                 $existe = Bicicleta::where('id', $item['produto_id'])->exists();
@@ -402,7 +401,8 @@ class VendaController extends Controller
     {
         $this->validateForm($request);
 
-        DB::transaction(function () use ($request) {
+        //permite que as operações realizadas sejam desfeitas
+        DB::transaction(function () use ($request) { //função anonima que recebe o request como parâmetro
             $venda = Venda::create([
                 'usuario_id'     => $request->usuario_id,
                 'funcionario_id' => $request->funcionario_id,
@@ -418,7 +418,7 @@ class VendaController extends Controller
                 $subtotal   = $quantidade * $preco;
 
                 $valorTotal += $subtotal;
-
+                //Salvar cada item da venda
                 ItemVenda::create([
                     'venda_id'       => $venda->id,
                     'bicicleta_id'   => $item['tipo'] === 'bicicleta' ? $item['produto_id'] : null,

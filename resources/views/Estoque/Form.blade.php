@@ -7,6 +7,7 @@
     <div class="card shadow-sm">
         <div class="card-header bg-primary text-white">
             <h4 class="mb-0">
+                //verifica se o estoque existe e se é uma edição ou cadastro
                 {{ isset($estoque) && $estoque->exists ? 'Editar Produto do Estoque' : 'Cadastro de Estoque' }}
             </h4>
         </div>
@@ -22,7 +23,7 @@
                     </ul>
                 </div>
             @endif
-
+            //escolhendo a rota de acordo com a ação (cadastro ou edição)
             @php
                 $action = isset($estoque) && $estoque->exists
                     ? route('estoque.update', $estoque->id)

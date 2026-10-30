@@ -65,8 +65,8 @@
                 <th>Status</th>
                 <th>Link do Site</th>
                 <th>Redes Sociais</th>
-                <th class="text-center">Ações</th>
-                <th class="text-center">Ações</th>
+                <th class="text-center">Ações Editar</th>
+                <th class="text-center">Ações Excluir</th>
             </tr>
         </thead>
         <tbody>
