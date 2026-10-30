@@ -15,7 +15,7 @@ use Illuminate\Support\Facades\DB;
 class VendaController extends Controller
 {
     public function index(Request $request)
-    {   //limpadados antigos para não dar erro
+    {   
         session()->forget([
             'itens_venda_temp',
             'venda_usuario_id',
