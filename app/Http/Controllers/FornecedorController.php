@@ -76,7 +76,7 @@ class FornecedorController extends Controller
 
     public function store(Request $request)
     {
-        $this->validateForm($request); // No cadastro não precisa de ID
+        $this->validateForm($request);
 
         Fornecedor::create($request->all());
 

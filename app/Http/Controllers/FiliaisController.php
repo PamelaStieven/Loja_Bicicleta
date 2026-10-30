@@ -7,7 +7,8 @@ use Illuminate\Validation\Rule;
 use App\Models\Filiais;
 
 class FiliaisController extends Controller
-{
+
+{   //mostrar filiais cadastradas
     public function index(Request $request)
     {
         $query = Filiais::query();
@@ -30,10 +31,10 @@ class FiliaisController extends Controller
     {
         $request->validate([
             'nome'      => 'required',
-            'cnpj'      => [
-                'required',
-                Rule::unique('filiais', 'cnpj')->ignore($id),
-            ],
+            'cnpj'      => ['required',
+
+            Rule::unique('filiais', 'cnpj')->ignore($id),],
+
             'cidade'    => 'required',
             'bairro'    => 'required',
             'rua'       => 'required',
@@ -71,7 +72,7 @@ class FiliaisController extends Controller
 
     public function update(Request $request, $id)
     {
-        // Chama a validação passando o ID atual para ignorar o próprio registo no unique do CNPJ
+    
         $this->validateForm($request, $id);
 
         $filial = Filiais::findOrFail($id);

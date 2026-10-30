@@ -40,7 +40,6 @@ class EstoqueController extends Controller
             'preco.min' => 'O preço não pode ser negativo.',
         ]);
     }
-
     public function store(Request $request)
     {
         $this->validateForm($request);
@@ -50,7 +49,7 @@ class EstoqueController extends Controller
             'quantidade' => $request->quantidade,
             'preco' => $request->preco,
         ]);
-
+        //redireciona
         return redirect()
             ->route('estoque.index')
             ->with('success', 'Produto cadastrado no estoque com sucesso!');
@@ -129,7 +128,7 @@ class EstoqueController extends Controller
                 break;
 
             case 'preco':
-                // Aceita preços como 25,50 ou 25.50
+            
                 $preco = str_replace(',', '.', $valor);
 
                 if (!is_numeric($preco) || (float) $preco < 0) {
