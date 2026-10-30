@@ -6,6 +6,7 @@ use App\Models\Estoque;
 use Illuminate\Http\Request;
 use ArielMejiaDev\LarapexCharts\LarapexChart;
 use Barryvdh\DomPDF\Facade\Pdf;
+use App\Charts\EstoqueChart;
 
 class EstoqueController extends Controller
 {
@@ -128,26 +129,14 @@ class EstoqueController extends Controller
         return $pdf->download('relatorio_estoque.pdf');
     }
 
-    public function chart(LarapexChart $chart)
+     public function chart(EstoqueChart $chart)
     {
-        $estoques = Estoque::orderBy('produto', 'asc')->get();
-
-        $produtos = $estoques->pluck('produto')->toArray();
-
-        $quantidades = $estoques
-            ->pluck('quantidade')
-            ->map(fn ($quantidade) => (int) $quantidade)
-            ->toArray();
-
-        $chartResult = $chart->barChart()
-            ->setTitle('Quantidade em Estoque por Produto')
-            ->setSubtitle('Controle de Inventário - Loja de Bicicletas')
-            ->addData('Quantidade', $quantidades)
-            ->setXAxis($produtos);
-
+        $estoques = Estoque::all();
+        
         return view('Estoque.chart', [
-            'chart' => $chartResult,
-            'estoques' => $estoques,
+            'chart' => $chart->build(),
+            'estoques' => $estoques
         ]);
     }
+
 }

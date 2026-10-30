@@ -3,8 +3,8 @@
 namespace App\Charts;
 
 use App\Models\Estoque;
-use ArielMejiaDev\LarapexCharts\LineChart;
 use ArielMejiaDev\LarapexCharts\LarapexChart;
+use ArielMejiaDev\LarapexCharts\LineChart;
 
 class EstoqueChart
 {
@@ -17,25 +17,25 @@ class EstoqueChart
 
     public function build(): LineChart
     {
-        $estoques = Estoque::orderBy('produto', 'asc')->get();
+        $estoque = Estoque::all();
 
         $labels = [];
-        $quantidades = [];
+        $quantidade = [];
 
-        foreach ($estoques as $item) {
+        foreach ($estoque as $item) {
             $labels[] = $item->produto;
-            $quantidades[] = (int) $item->quantidade;
+            $quantidade[] = (int) $item->quantidade;
         }
 
         if (empty($labels)) {
             $labels = ['Sem registros'];
-            $quantidades = [0];
+            $quantidade = [0];
         }
 
         return $this->chart->lineChart()
             ->setTitle('Relatório de Estoque')
             ->setSubtitle('Quantidade de Produtos em Estoque')
-            ->addData('Quantidade', $quantidades)
+            ->addData($quantidade, 'Quantidade')
             ->setXAxis($labels);
     }
 }

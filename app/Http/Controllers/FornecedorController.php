@@ -2,7 +2,6 @@
 
 namespace App\Http\Controllers;
 
-use Illuminate\Http\Request;
 use App\Models\Fornecedor;
 use App\Charts\FornecedorChart;
 use Barryvdh\DomPDF\Facade\Pdf; 
