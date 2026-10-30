@@ -477,60 +477,60 @@ class VendaController extends Controller
         return view('venda.itens', compact('venda'));
     }
 
-    public function search(Request $request)
-    {
-        $tipo =$request->input('tipo');
-        $valor = trim((string)$request->input('valor', ''));
+public function search(Request $request)
+{
+    $tipo = $request->input('tipo');
+    $valor = trim($request->input('valor', ''));
 
-        $query = Venda::with([
-            'usuario',
-            'funcionario',
-            'itens.bicicleta',
-            'itens.acessorio'
-        ]);
+    $query = Venda::with(['usuario', 'funcionario', 'itens']);
 
-        if ($valor !== '') {
-
-            if ($tipo === 'usuario') {
-
+    if ($valor !== '') {
+        switch ($tipo) {
+            case 'usuario':
                 $query->whereHas('usuario', function ($q) use ($valor) {
-                    $q->where('nome', 'like', "\%{$valor}%");
+                    $q->where('nome', 'like', '%' . $valor . '%');
                 });
+                break;
 
-            } elseif ($tipo === 'funcionario') {
-
+            case 'funcionario':
                 $query->whereHas('funcionario', function ($q) use ($valor) {
-                    $q->where('nome', 'like', "\%{$valor}%");
+                    $q->where('nome', 'like', '%' . $valor . '%');
                 });
+                break;
 
-            } elseif ($tipo === 'quantidade' && is_numeric($valor)) {
-
-                $query->whereHas('itens', function ($q) use ($valor) {
-                    $q->where('quantidade', (int)$valor);
-                });
-
-            } elseif ($tipo === 'data') {
-
-                try {
-                    \Carbon\Carbon::createFromFormat('Y-m-d', $valor);
-
-                    $query->whereDate('data_venda',$valor);
-
-                } catch (\Exception $e) {
-
-                    return redirect()
-                        ->route('venda.index')
-                        ->withErrors([
-                            'valor' => 'Informe uma data válida no formato AAAA-MM-DD.'
-                        ]);
-                }
-            }
-        }
-
-        $dados =$query->orderBy('id', 'desc')->get();
-
-        return view('venda.list', compact('dados'));
+            case 'quantidade':
+    if (is_numeric($valor)) {
+        $query->whereHas('itens')
+            ->withSum('itens as quantidade_total', 'quantidade')
+            ->having('quantidade_total', '=', (int) $valor);
+    } else {
+        $query->whereRaw('1 = 0');
     }
+    break;
+
+            case 'data':
+    if (!empty($valor)) {
+        try {
+            $data = \Carbon\Carbon::parse($valor)->format('Y-m-d');
+
+            $query->whereDate('data_venda', $data);
+
+        } catch (\Exception $e) {
+            $query->whereRaw('1 = 0');
+        }
+    }
+    break;
+
+            default:
+                $query->whereRaw('1 = 0');
+                break;
+        }
+    }
+
+    $dados = $query->orderBy('data_venda', 'desc')->get();
+
+    return view('venda.list', compact('dados'));
+}
 
     public function report()
     {
